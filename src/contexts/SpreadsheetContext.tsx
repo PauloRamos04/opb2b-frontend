@@ -1,20 +1,26 @@
 'use client';
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { apiService, NovoChamadoData } from '@/services/api.service';
-import { useSocket } from '@/hooks/useSocket';
-import toast from 'react-hot-toast';
+import { apiService } from '../services/api.service';
+import { toast } from 'react-hot-toast';
+
+export interface NovoChamadoData {
+  empresa: string;
+  contato: string;
+  telefone: string;
+  email: string;
+  descricao: string;
+  prioridade: 'Baixa' | 'Média' | 'Alta' | 'Crítica';
+}
 
 interface SpreadsheetContextType {
   data: string[][];
   loading: boolean;
   error: string | null;
-  filters: Record<string, string[]>;
-  setFilters: (filters: Record<string, string[]>) => void;
+  loadData: () => Promise<void>;
   updateCell: (row: number, col: number, value: string) => Promise<void>;
-  refreshData: () => Promise<void>;
-  isConnected: boolean;
   criarNovoChamado: (dados: NovoChamadoData) => Promise<void>;
-  exportarDados: (filtros?: any) => Promise<void>;
+  isConnected: boolean;
 }
 
 const SpreadsheetContext = createContext<SpreadsheetContextType | undefined>(undefined);
@@ -33,77 +39,31 @@ interface SpreadsheetProviderProps {
 
 export const SpreadsheetProvider: React.FC<SpreadsheetProviderProps> = ({ children }) => {
   const [data, setData] = useState<string[][]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState<Record<string, string[]>>({});
-  
-  const socket = useSocket(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001');
+  const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    loadData();
-    
-    const interval = setInterval(() => {
-      if (!loading) {
-        loadData();
-      }
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    if (socket) {
-      socket.on('data-update', (newData: { values: string[][] }) => {
-        console.log('Dados atualizados via socket');
-        setData(newData.values);
-      });
-
-      socket.on('cell-updated', (update: { row: number; col: number; value: string }) => {
-        console.log('Célula atualizada via socket:', update);
-        setData(prevData => {
-          const newData = [...prevData];
-          if (!newData[update.row]) newData[update.row] = [];
-          newData[update.row][update.col] = update.value;
-          return newData;
-        });
-        toast.success('Célula atualizada por outro usuário', {
-          duration: 3000,
-          position: 'top-right'
-        });
-      });
-
-      socket.on('novo-chamado', (chamado: any) => {
-        console.log('Novo chamado criado via socket:', chamado);
-        toast.success('Novo chamado foi criado no sistema', {
-          duration: 4000,
-          position: 'top-right'
-        });
-        loadData();
-      });
-
-      socket.on('connection-status', (status: { connected: boolean; message?: string }) => {
-        if (status.connected) {
-          toast.success('Reconectado ao servidor', {
+    const checkConnection = async () => {
+      try {
+        const response = await apiService.getStatus();
+        setIsConnected(response.success);
+        if (response.success) {
+          toast.success('Conectado ao servidor', {
             duration: 3000,
             position: 'top-right'
           });
-        } else {
-          toast.error('Conexão perdida com o servidor', {
-            duration: 5000,
-            position: 'top-right'
-          });
         }
-      });
+      } catch (error) {
+        setIsConnected(false);
+        console.error('Erro de conexão:', error);
+      }
+    };
 
-      return () => {
-        socket.off('data-update');
-        socket.off('cell-updated');
-        socket.off('novo-chamado');
-        socket.off('error');
-        socket.off('connection-status');
-      };
-    }
-  }, [socket]);
+    checkConnection();
+    const interval = setInterval(checkConnection, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const loadData = async () => {
     try {
@@ -114,12 +74,14 @@ export const SpreadsheetProvider: React.FC<SpreadsheetProviderProps> = ({ childr
       if (response.success && response.data) {
         setData(response.data);
         console.log(`Dados carregados: ${response.data.length} linhas`);
+        setIsConnected(true);
       } else {
         throw new Error('Resposta inválida do servidor');
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao carregar dados';
       setError(errorMessage);
+      setIsConnected(false);
       console.error('Erro ao carregar dados:', err);
       
       toast.error(errorMessage, {
@@ -145,10 +107,6 @@ export const SpreadsheetProvider: React.FC<SpreadsheetProviderProps> = ({ childr
           newData[row][col] = value;
           return newData;
         });
-
-        if (socket) {
-          socket.emit('update-cell', { row, col, value });
-        }
 
         toast.success('Célula atualizada com sucesso!', {
           duration: 3000,
@@ -176,15 +134,11 @@ export const SpreadsheetProvider: React.FC<SpreadsheetProviderProps> = ({ childr
       const response = await apiService.criarChamado(dados);
       
       if (response.success) {
-        if (socket) {
-          socket.emit('novo-chamado', dados);
-        }
-
         toast.success('Novo chamado criado com sucesso!', {
-          duration: 4000,
+          duration: 5000,
           position: 'top-right'
         });
-
+        
         await loadData();
       } else {
         throw new Error(response.message || 'Falha ao criar chamado');
@@ -197,64 +151,23 @@ export const SpreadsheetProvider: React.FC<SpreadsheetProviderProps> = ({ childr
         duration: 5000,
         position: 'top-right'
       });
-      throw err;
+      throw new Error(errorMessage);
     }
-  };
-
-  const exportarDados = async (filtros?: any) => {
-    try {
-      console.log('Exportando dados com filtros:', filtros);
-      
-      const blob = await apiService.exportarDados(filtros);
-      
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `chamados_${new Date().toISOString().split('T')[0]}.xlsx`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-
-      toast.success('Dados exportados com sucesso!', {
-        duration: 3000,
-        position: 'top-right'
-      });
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erro ao exportar dados';
-      console.error('Erro ao exportar dados:', err);
-      
-      toast.error(errorMessage, {
-        duration: 5000,
-        position: 'top-right'
-      });
-      throw err;
-    }
-  };
-
-  const refreshData = async () => {
-    console.log('Atualizando dados manualmente...');
-    await loadData();
-  };
-
-  const contextValue: SpreadsheetContextType = {
-    data,
-    loading,
-    error,
-    filters,
-    setFilters,
-    updateCell,
-    refreshData,
-    isConnected: socket?.isConnected || false,
-    criarNovoChamado,
-    exportarDados
   };
 
   return (
-    <SpreadsheetContext.Provider value={contextValue}>
+    <SpreadsheetContext.Provider
+      value={{
+        data,
+        loading,
+        error,
+        loadData,
+        updateCell,
+        criarNovoChamado,
+        isConnected,
+      }}
+    >
       {children}
     </SpreadsheetContext.Provider>
   );
 };
-
-export default SpreadsheetProvider;
