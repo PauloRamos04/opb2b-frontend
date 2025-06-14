@@ -1,63 +1,46 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://opb2b-backend-production.up.railway.app' 
+  : 'http://localhost:3001';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
-  }
+  },
 });
 
-export interface UpdateCellData {
+export interface UpdateCellRequest {
   row: number;
   col: number;
   value: string;
 }
 
-export interface SpreadsheetResponse {
-  success: boolean;
-  data: string[][];
-  timestamp: string;
-}
-
-export interface UpdateResponse {
-  success: boolean;
-  message: string;
-  data?: {
-    row: number;
-    col: number;
-    value: string;
-  };
-  timestamp: string;
-}
-
 export interface NovoChamadoData {
-  operador: string;
-  cliente: string;
-  carteira: string;
-  cidade: string;
-  tecnico?: string;
-  status: string;
-  assunto: string;
+  empresa: string;
+  contato: string;
+  telefone: string;
+  email: string;
   descricao: string;
+  prioridade: 'Baixa' | 'Média' | 'Alta' | 'Crítica';
 }
 
 export const apiService = {
-  async getData(): Promise<SpreadsheetResponse> {
+  async getData(): Promise<{ success: boolean; data: string[][]; message?: string }> {
     try {
-      const response = await api.get<SpreadsheetResponse>('/spreadsheet/data');
+      const response = await api.get('/spreadsheet/data');
       return response.data;
     } catch (error) {
       console.error('Erro ao buscar dados:', error);
-      throw new Error('Falha ao conectar com o servidor');
+      throw new Error('Falha ao carregar dados da planilha');
     }
   },
 
-  async updateCell(data: UpdateCellData): Promise<UpdateResponse> {
+  async updateCell(data: UpdateCellRequest): Promise<{ success: boolean; message: string }> {
     try {
-      const response = await api.post<UpdateResponse>('/spreadsheet/update-cell', data);
+      const response = await api.post('/spreadsheet/update-cell', data);
       return response.data;
     } catch (error) {
       console.error('Erro ao atualizar célula:', error);
@@ -65,9 +48,9 @@ export const apiService = {
     }
   },
 
-  async criarChamado(data: NovoChamadoData): Promise<UpdateResponse> {
+  async criarChamado(dados: NovoChamadoData): Promise<{ success: boolean; message: string }> {
     try {
-      const response = await api.post<UpdateResponse>('/spreadsheet/novo-chamado', data);
+      const response = await api.post('/spreadsheet/novo-chamado', dados);
       return response.data;
     } catch (error) {
       console.error('Erro ao criar chamado:', error);
@@ -75,7 +58,7 @@ export const apiService = {
     }
   },
 
-  async exportarDados(filtros?: any): Promise<Blob> {
+  async exportarDados(filtros: any): Promise<Blob> {
     try {
       const response = await api.post('/spreadsheet/exportar', filtros, {
         responseType: 'blob'
