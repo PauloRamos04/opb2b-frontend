@@ -1,25 +1,21 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    webpack: (config, { isServer }) => {
-      if (!isServer) {
-        config.resolve.fallback = {
-          ...config.resolve.fallback,
-          fs: false,
-          net: false,
-          tls: false,
-          bufferutil: false,
-          'utf-8-validate': false,
-        };
-      }
-      
-      // Ignorar warnings específicos do WebSocket
-      config.ignoreWarnings = [
-        { module: /node_modules\/ws\/lib\/buffer-util\.js/ },
-        { module: /node_modules\/ws\/lib\/validation\.js/ },
-      ];
-      
-      return config;
+    experimental: {
+      appDir: true,
     },
+    async headers() {
+      return [
+        {
+          source: '/api/:path*',
+          headers: [
+            { key: 'Access-Control-Allow-Credentials', value: 'true' },
+            { key: 'Access-Control-Allow-Origin', value: '*' },
+            { key: 'Access-Control-Allow-Methods', value: 'GET,OPTIONS,PATCH,DELETE,POST,PUT' },
+            { key: 'Access-Control-Allow-Headers', value: 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version' },
+          ]
+        }
+      ]
+    }
   }
   
   module.exports = nextConfig
