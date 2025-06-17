@@ -3,19 +3,19 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSpreadsheet } from '@/contexts/SpreadsheetContext';
 import { useTheme } from '@/contexts/ThemeContext';
-import { 
-  Edit, 
-  Eye, 
-  RefreshCw, 
-  Filter, 
-  X, 
-  Search, 
-  EyeOff, 
-  Plus, 
-  Calendar, 
-  User, 
-  AlertCircle, 
-  CheckCircle, 
+import {
+  Edit,
+  Eye,
+  RefreshCw,
+  Filter,
+  X,
+  Search,
+  EyeOff,
+  Plus,
+  Calendar,
+  User,
+  AlertCircle,
+  CheckCircle,
   Clock,
   Settings,
   ChevronDown,
@@ -41,16 +41,17 @@ interface FilteredDataItem {
 const Spreadsheet: React.FC = () => {
   const { data, loading, error, filters, setFilters, updateCell, refreshData, isConnected } = useSpreadsheet();
   const { darkMode } = useTheme();
-  
+
   const [filteredData, setFilteredData] = useState<FilteredDataItem[]>([]);
   const [editingCell, setEditingCell] = useState<{ row: number; col: number } | null>(null);
   const [editValue, setEditValue] = useState('');
   const [popup, setPopup] = useState<PopupData>({ aberto: false, tipo: '', dados: null, linha: null });
   const [novoAndamento, setNovoAndamento] = useState('');
   const [formValues, setFormValues] = useState<any>({});
-  
+
   const [filtrosAvancados, setFiltrosAvancados] = useState({
     operador: '',
+    servico: '',
     status: '',
     carteira: '',
     cidade: '',
@@ -63,6 +64,7 @@ const Spreadsheet: React.FC = () => {
 
   const [colunasVisiveis, setColunasVisiveis] = useState({
     OPERADOR: true,
+    'SERVIÇO': true,
     'Histórico': true,
     STATUS: true,
     RETORNO: true,
@@ -83,9 +85,9 @@ const Spreadsheet: React.FC = () => {
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
 
   const tableColumnOrder = [
-    'OPERADOR', 'Histórico', 'STATUS', 'RETORNO', 'ASSUNTO', 'CARTEIRA', 
-    'CIDADE', 'TEC', 'DESCRIÇÃO', 'DATA ABERTURA', 'H_RETORNO', 
-     'RESOLUÇÃO BO:', 'CLIENTE', 'UF', 'REGIONAL', 'ÚLTIMA EDIÇÃO'
+    'OPERADOR', 'Histórico', 'SERVIÇO', 'STATUS', 'RETORNO', 'ASSUNTO', 'CARTEIRA',
+    'CIDADE', 'TEC', 'DESCRIÇÃO', 'DATA ABERTURA', 'H_RETORNO',
+    'RESOLUÇÃO BO:', 'CLIENTE', 'UF', 'REGIONAL', 'ÚLTIMA EDIÇÃO'
   ];
 
   const columnIndices = {
@@ -101,17 +103,19 @@ const Spreadsheet: React.FC = () => {
   const valoresUnicos = useMemo(() => {
     if (data.length === 0) return {
       operadores: [],
+      servico: [],
       status: [],
       carteiras: [],
       cidades: [],
       tecnicos: []
     };
-    
+
     const dataStartRow = 8;
     const dataRows = data.slice(dataStartRow);
-    
+
     return {
       operadores: getUniqueValues(dataRows.map(row => row[columnIndices.OPERADOR] || '')),
+      servico: getUniqueValues(dataRows.map(row => row[columnIndices.SERVIÇO] || '')),
       status: getUniqueValues(dataRows.map(row => row[columnIndices.STATUS] || '')),
       carteiras: getUniqueValues(dataRows.map(row => row[columnIndices.CARTEIRA] || '')),
       cidades: getUniqueValues(dataRows.map(row => row[columnIndices.CIDADE] || '')),
@@ -128,9 +132,9 @@ const Spreadsheet: React.FC = () => {
   const applyFilters = () => {
     const dataStartRow = 8;
     const dataRows = data.slice(dataStartRow);
-    
+
     const filtered = filterData(dataRows, filtrosAvancados, columnIndices);
-    
+
     const filteredWithOriginalIndex = filtered.map((rowData) => {
       const originalIndex = dataRows.findIndex(dataRow => dataRow === rowData);
       return {
@@ -138,7 +142,7 @@ const Spreadsheet: React.FC = () => {
         originalIndex: originalIndex + dataStartRow + 1
       };
     });
-    
+
     setFilteredData(filteredWithOriginalIndex);
   };
 
@@ -158,12 +162,12 @@ const Spreadsheet: React.FC = () => {
 
         const response = await updateCell(editingCell.row, editingCell.col, editValue);
         console.log('Resposta do salvamento:', response);
-        
+
         setEditingCell(null);
         setEditValue('');
-        
+
         await refreshData();
-        
+
       } catch (error) {
         console.error('Erro completo ao salvar:', error);
         const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
@@ -201,9 +205,9 @@ const Spreadsheet: React.FC = () => {
       console.log('🧪 Testando conexão...');
       const response = await fetch('http://localhost:3001/spreadsheet/data');
       const result = await response.json();
-      
+
       console.log('📡 Resultado do teste:', result);
-      
+
       if (result.success) {
         alert(`✅ Conexão OK! ${result.data?.length || 0} linhas encontradas`);
       } else {
@@ -224,16 +228,16 @@ const Spreadsheet: React.FC = () => {
         col: 0,
         value: `TESTE_${new Date().toLocaleTimeString()}`
       };
-      
+
       const response = await fetch('http://localhost:3001/spreadsheet/update-cell', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(testData)
       });
-      
+
       const result = await response.json();
       console.log('💾 Resultado do teste de salvamento:', result);
-      
+
       if (result.success) {
         alert('✅ Teste de salvamento OK! Verifique a planilha.');
         await refreshData();
@@ -251,7 +255,7 @@ const Spreadsheet: React.FC = () => {
     try {
       const agora = new Date().toLocaleString('pt-BR');
       const colIndex = columnIndices['RETORNO'];
-      
+
       const response = await fetch(`${process.env.NODE_ENV === 'production' ? 'https://opb2b-backend-production.up.railway.app' : 'http://localhost:3001'}/spreadsheet/update-cell`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -261,15 +265,15 @@ const Spreadsheet: React.FC = () => {
           value: agora
         })
       });
-      
+
       const result = await response.json();
       if (!result.success) {
         throw new Error(result.message || 'Erro ao atualizar célula');
       }
-      
+
       alert(`✅ Chamado #${dadosRow.historico} pego com sucesso!`);
       await refreshData();
-      
+
     } catch (error) {
       console.error('❌ Erro ao pegar chamado:', error);
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
@@ -282,31 +286,31 @@ const Spreadsheet: React.FC = () => {
       e.preventDefault();
       e.stopPropagation();
     }
-    
+
     if (!novoAndamento.trim()) {
       alert('Por favor, digite um andamento antes de salvar.');
       return;
     }
-    
+
     try {
       console.log('💾 Adicionando andamento:', novoAndamento);
-      
+
       const timestamp = new Date().toLocaleString('pt-BR');
       const novoAndamentoCompleto = `${timestamp} - ${novoAndamento}`;
-      
+
       const rowIndex = popup.linha;
       const colIndex = columnIndices['DESCRIÇÃO'];
-      
+
       console.log('📍 Salvando em:', { row: rowIndex, col: colIndex });
-      
+
       if (rowIndex !== null) {
         const valorAtual = popup.dados?.descricao || '';
-        const novoValor = valorAtual 
+        const novoValor = valorAtual
           ? `${valorAtual}\n${novoAndamentoCompleto}`
           : novoAndamentoCompleto;
-        
+
         console.log('📝 Novo valor:', novoValor);
-        
+
         const response = await fetch(`${process.env.NODE_ENV === 'production' ? 'https://opb2b-backend-production.up.railway.app' : 'http://localhost:3001'}/spreadsheet/update-cell`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -316,25 +320,25 @@ const Spreadsheet: React.FC = () => {
             value: novoValor
           })
         });
-        
+
         const result = await response.json();
         if (!result.success) {
           throw new Error(result.message || 'Erro ao atualizar célula');
         }
-        
+
         setPopup(prev => ({
           ...prev,
           dados: { ...prev.dados, descricao: novoValor }
         }));
-        
+
         setFormValues((prev: any) => ({
           ...prev,
           descricao: novoValor
         }));
-        
+
         setNovoAndamento('');
         alert('✅ Andamento adicionado com sucesso!');
-        
+
       } else {
         throw new Error('Linha não encontrada');
       }
@@ -348,7 +352,7 @@ const Spreadsheet: React.FC = () => {
   const salvarAlteracoesPopup = async () => {
     try {
       console.log('💾 Salvando todas as alterações do popup...');
-      
+
       if (!popup.dados || popup.linha === null) {
         throw new Error('Dados do popup não encontrados');
       }
@@ -359,11 +363,12 @@ const Spreadsheet: React.FC = () => {
       }
 
       const formData = new FormData(form);
-      const updates: Array<{row: number, col: number, value: string}> = [];
+      const updates: Array<{ row: number, col: number, value: string }> = [];
 
       const fieldMapping = {
         'operador': 'OPERADOR',
-        'status': 'STATUS', 
+        'servico': 'SERVIÇO',
+        'status': 'STATUS',
         'carteira': 'CARTEIRA',
         'cidade': 'CIDADE',
         'tecnico': 'TEC',
@@ -374,11 +379,11 @@ const Spreadsheet: React.FC = () => {
 
       Object.entries(fieldMapping).forEach(([fieldName, columnName]) => {
         let value = formData.get(fieldName) as string;
-        
+
         if (fieldName === 'descricao') {
           value = formValues.descricao || popup.dados.descricao || '';
         }
-        
+
         if (value !== null) {
           const colIndex = columnIndices[columnName as keyof typeof columnIndices];
           updates.push({
@@ -397,20 +402,20 @@ const Spreadsheet: React.FC = () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(update)
         });
-        
+
         const result = await response.json();
         if (!result.success) {
           throw new Error(result.message || 'Erro ao atualizar célula');
         }
-        
+
         await new Promise(resolve => setTimeout(resolve, 100));
       }
 
       alert('✅ Todas as alterações foram salvas com sucesso!');
-      
+
       fecharPopup();
       await refreshData();
-      
+
     } catch (error) {
       console.error('❌ Erro ao salvar alterações:', error);
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
@@ -421,6 +426,7 @@ const Spreadsheet: React.FC = () => {
   const limparFiltros = () => {
     setFiltrosAvancados({
       operador: '',
+      servico: '',
       status: '',
       carteira: '',
       cidade: '',
@@ -429,6 +435,7 @@ const Spreadsheet: React.FC = () => {
       dataFim: '',
       buscaGeral: '',
       prioridade: ''
+
     });
   };
 
@@ -452,7 +459,7 @@ const Spreadsheet: React.FC = () => {
     };
 
     const className = statusClasses[status as keyof typeof statusClasses] || 'bg-gray-200 text-gray-800';
-    
+
     return (
       <span className={`px-2 py-1 rounded-full text-xs font-medium ${className}`}>
         {status}
@@ -479,12 +486,12 @@ const Spreadsheet: React.FC = () => {
       'TECNET': 'bg-gray-400 text-white',
       'WAYNET': 'bg-red-300 text-white',
       'WEBNET': 'bg-cyan-400 text-white',
-      'WEBBY': 'bg-purple-300 text-white',
-      'AZZA': 'bg-yellow-400 text-black'
+      'WEBBY': 'bg-green-300 text-white',
+      'AZZA': 'bg-cyan-400 text-black'
     };
 
     const className = carteiraClasses[carteira as keyof typeof carteiraClasses] || 'bg-gray-200 text-gray-800';
-    
+
     return (
       <span className={`px-2 py-1 rounded-full text-xs font-medium ${className}`}>
         {carteira}
@@ -528,39 +535,36 @@ const Spreadsheet: React.FC = () => {
               Sistema de Chamados B2B
             </h2>
             <div className="flex items-center space-x-4 mt-2">
-              <div className={`flex items-center space-x-2 px-3 py-1 rounded-full text-sm ${
-                isConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-              }`}>
+              <div className={`flex items-center space-x-2 px-3 py-1 rounded-full text-sm ${isConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                }`}>
                 <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
                 <span>{isConnected ? 'Conectado' : 'Desconectado'}</span>
               </div>
               <span className={darkMode ? 'text-gray-50' : 'text-gray-600'}>{filteredData.length} chamados encontrados</span>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-3">
-            
+
             <button
               onClick={() => setMostrarFiltros(!mostrarFiltros)}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg border transition-colors ${
-                mostrarFiltros 
-                  ? 'bg-indigo-50 border-indigo-200 text-indigo-700' 
-                  : darkMode 
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg border transition-colors ${mostrarFiltros
+                  ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
+                  : darkMode
                     ? 'bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600'
                     : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-              }`}
+                }`}
             >
               <Filter className="w-4 h-4" />
               <span>Filtros</span>
               <ChevronDown className={`w-4 h-4 transition-transform ${mostrarFiltros ? 'rotate-180' : ''}`} />
             </button>
-          
-            
+
+
             <button
               onClick={refreshData}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${
-                darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
             >
               <RefreshCw className="w-4 h-4" />
               <span>Atualizar</span>
@@ -580,11 +584,10 @@ const Spreadsheet: React.FC = () => {
                     placeholder="Buscar em todos os campos..."
                     value={filtrosAvancados.buscaGeral}
                     onChange={(e) => setFiltrosAvancados(prev => ({ ...prev, buscaGeral: e.target.value }))}
-                    className={`pl-10 w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                      darkMode 
-                        ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-300' 
+                    className={`pl-10 w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${darkMode
+                        ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-300'
                         : 'bg-white border-gray-300 text-gray-900'
-                    }`}
+                      }`}
                   />
                 </div>
               </div>
@@ -594,11 +597,10 @@ const Spreadsheet: React.FC = () => {
                 <select
                   value={filtrosAvancados.operador}
                   onChange={(e) => setFiltrosAvancados(prev => ({ ...prev, operador: e.target.value }))}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                    darkMode 
-                      ? 'bg-gray-700 border-gray-600 text-white' 
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${darkMode
+                      ? 'bg-gray-700 border-gray-600 text-white'
                       : 'bg-white border-gray-300 text-gray-900'
-                  }`}
+                    }`}
                 >
                   <option value="">Todos os operadores</option>
                   {valoresUnicos.operadores?.map(operador => (
@@ -612,11 +614,10 @@ const Spreadsheet: React.FC = () => {
                 <select
                   value={filtrosAvancados.status}
                   onChange={(e) => setFiltrosAvancados(prev => ({ ...prev, status: e.target.value }))}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                    darkMode 
-                      ? 'bg-gray-700 border-gray-600 text-white' 
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${darkMode
+                      ? 'bg-gray-700 border-gray-600 text-white'
                       : 'bg-white border-gray-300 text-gray-900'
-                  }`}
+                    }`}
                 >
                   <option value="">Todos os status</option>
                   {valoresUnicos.status?.map(status => (
@@ -630,11 +631,10 @@ const Spreadsheet: React.FC = () => {
                 <select
                   value={filtrosAvancados.carteira}
                   onChange={(e) => setFiltrosAvancados(prev => ({ ...prev, carteira: e.target.value }))}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                    darkMode 
-                      ? 'bg-gray-700 border-gray-600 text-white' 
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${darkMode
+                      ? 'bg-gray-700 border-gray-600 text-white'
                       : 'bg-white border-gray-300 text-gray-900'
-                  }`}
+                    }`}
                 >
                   <option value="">Todas as carteiras</option>
                   {valoresUnicos.carteiras?.map(carteira => (
@@ -650,11 +650,10 @@ const Spreadsheet: React.FC = () => {
                   placeholder="Filtrar por cidade..."
                   value={filtrosAvancados.cidade}
                   onChange={(e) => setFiltrosAvancados(prev => ({ ...prev, cidade: e.target.value }))}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                    darkMode 
-                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-300' 
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${darkMode
+                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-300'
                       : 'bg-white border-gray-300 text-gray-900'
-                  }`}
+                    }`}
                 />
               </div>
 
@@ -665,11 +664,10 @@ const Spreadsheet: React.FC = () => {
                   placeholder="Filtrar por técnico..."
                   value={filtrosAvancados.tecnico}
                   onChange={(e) => setFiltrosAvancados(prev => ({ ...prev, tecnico: e.target.value }))}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                    darkMode 
-                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-300' 
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${darkMode
+                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-300'
                       : 'bg-white border-gray-300 text-gray-900'
-                  }`}
+                    }`}
                 />
               </div>
 
@@ -679,11 +677,10 @@ const Spreadsheet: React.FC = () => {
                   type="date"
                   value={filtrosAvancados.dataInicio}
                   onChange={(e) => setFiltrosAvancados(prev => ({ ...prev, dataInicio: e.target.value }))}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                    darkMode 
-                      ? 'bg-gray-700 border-gray-600 text-white' 
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${darkMode
+                      ? 'bg-gray-700 border-gray-600 text-white'
                       : 'bg-white border-gray-300 text-gray-900'
-                  }`}
+                    }`}
                 />
               </div>
 
@@ -693,12 +690,28 @@ const Spreadsheet: React.FC = () => {
                   type="date"
                   value={filtrosAvancados.dataFim}
                   onChange={(e) => setFiltrosAvancados(prev => ({ ...prev, dataFim: e.target.value }))}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                    darkMode 
-                      ? 'bg-gray-700 border-gray-600 text-white' 
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${darkMode
+                      ? 'bg-gray-700 border-gray-600 text-white'
                       : 'bg-white border-gray-300 text-gray-900'
-                  }`}
+                    }`}
                 />
+              </div>
+
+              <div>
+                <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-50' : 'text-gray-700'}`}>Operador</label>
+                <select
+                  value={filtrosAvancados.servico}
+                  onChange={(e) => setFiltrosAvancados(prev => ({ ...prev, servico: e.target.value }))}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${darkMode
+                      ? 'bg-gray-700 border-gray-600 text-white'
+                      : 'bg-white border-gray-300 text-gray-900'
+                    }`}
+                >
+                  <option value="">Todos os serviços</option>
+                  {valoresUnicos.servico?.map(servicos => (
+                    <option key={servicos} value={servicos}>{servicos}</option>
+                  ))}
+                </select>
               </div>
             </div>
 
@@ -727,17 +740,15 @@ const Spreadsheet: React.FC = () => {
               >
                 Limpar todos os filtros
               </button>
-              
+
               <div className="flex space-x-2">
-                <button className={`flex items-center space-x-2 px-3 py-1 text-sm rounded hover:bg-opacity-80 ${
-                  darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'
-                }`}>
+                <button className={`flex items-center space-x-2 px-3 py-1 text-sm rounded hover:bg-opacity-80 ${darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'
+                  }`}>
                   <Download className="w-4 h-4" />
                   <span>Exportar</span>
                 </button>
-                <button className={`flex items-center space-x-2 px-3 py-1 text-sm rounded hover:bg-opacity-80 ${
-                  darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'
-                }`}>
+                <button className={`flex items-center space-x-2 px-3 py-1 text-sm rounded hover:bg-opacity-80 ${darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'
+                  }`}>
                   <Upload className="w-4 h-4" />
                   <span>Importar</span>
                 </button>
@@ -746,37 +757,36 @@ const Spreadsheet: React.FC = () => {
           </div>
         )}
       </div>
-
+      {/*tabela*/}
       <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow overflow-hidden`}>
         <div className="overflow-x-auto">
           <table className="w-full table-auto">
-            <thead className={darkMode ? 'bg-gray-700' : 'bg-gray-50'}>
+            <thead className={darkMode ? 'sy-700' : 'bg-gray-50'}>
               <tr>
-                <th className={`px-4 py-3 text-left text-xs font-medium uppercase tracking-wider border-b ${
-                  darkMode ? 'text-gray-50 border-gray-600' : 'text-gray-500 border-gray-200'
-                }`}>
+                <th className={`px-4 py-3 text-left text-xs font-medium uppercase tracking-wider border-b ${darkMode ? 'text-gray-50 border-gray-600' : 'text-gray-500 border-gray-200'
+                  }`}>
                   Ações
                 </th>
                 {tableColumnOrder
                   .filter(colName => colunasVisiveis[colName as keyof typeof colunasVisiveis])
                   .map((colName) => (
-                  <th key={colName} className={`px-4 py-3 text-left text-xs font-medium uppercase tracking-wider border-b ${
-                    darkMode ? 'text-gray-50 border-gray-600' : 'text-gray-500 border-gray-200'
-                  }`}>
-                    {colName}
-                  </th>
-                ))}
+                    <th key={colName} className={`px-4 py-3 text-left text-xs font-medium uppercase tracking-wider border-b ${darkMode ? 'text-gray-50 border-gray-600' : 'text-gray-500 border-gray-200'
+                      }`}>
+                      {colName}
+                    </th>
+                  ))}
               </tr>
             </thead>
-            <tbody className={`divide-y ${darkMode ? 'bg-gray-800 divide-gray-600' : 'bg-white divide-gray-200'}`}>
+            <tbody className={`divide-y ${darkMode ? 'bg-gray-800  divide-gray-600' : 'bg-white divide-gray-200'}`}>
               {filteredData.map((item, rowIndex) => {
                 const row = item.data;
                 const actualRowIndex = item.originalIndex;
-                
+
                 const dadosRow = {
                   id: actualRowIndex,
                   operador: getCellValue(row, 'OPERADOR'),
                   historico: getCellValue(row, 'Histórico'),
+                  servico: getCellValue(row, 'SERVIÇO'),
                   status: getCellValue(row, 'STATUS'),
                   retorno: getCellValue(row, 'RETORNO'),
                   assunto: getCellValue(row, 'ASSUNTO'),
@@ -817,63 +827,54 @@ const Spreadsheet: React.FC = () => {
                     {tableColumnOrder
                       .filter(colName => colunasVisiveis[colName as keyof typeof colunasVisiveis])
                       .map((colName) => {
-                      const value = getCellValue(row, colName);
-                      const colIndex = columnIndices[colName as keyof typeof columnIndices];
-                      
-                      return (
-                        <td key={colName} className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 border-b">
-                          {editingCell?.row === actualRowIndex && editingCell?.col === colIndex ? (
-                            <div className="flex space-x-2">
-                              <input
-                                type="text"
-                                value={editValue}
-                                onChange={(e) => setEditValue(e.target.value)}
-                                className="flex-1 px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter') handleSaveEdit();
-                                  if (e.key === 'Escape') handleCancelEdit();
-                                }}
-                                autoFocus
-                              />
-                              <button
-                                onClick={handleSaveEdit}
-                                className="px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600"
+                        const value = getCellValue(row, colName);
+                        const colIndex = columnIndices[colName as keyof typeof columnIndices];
+
+                        return (
+                          <td key={colName} className={`px-4 py-4 whitespace-nowrap text-sm border-b ${darkMode ? 'text-white border-gray-700' : 'text-gray-600 border-gray-300'
+                            }`}>
+                            {editingCell?.row === actualRowIndex && editingCell?.col === colIndex ? (
+                              <div className="flex space-x-2">
+                                <input
+                                  type="text"
+                                  value={editValue}
+
+                                  className="flex-1 px-2 py-1 border rounded focus:outline-none focus:ring-1 focus:ring-gray-600 dark:focus:ring-gray-400"
+
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') handleSaveEdit();
+                                    if (e.key === 'Escape') handleCancelEdit();
+                                  }}
+                                  autoFocus
+                                />
+
+                              </div>
+                            ) : (
+                              <div
+                                className={`max-w-xs truncate cursor-pointer p-1 rounded transition-colors duration-200 ${darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-200'
+                                  }`}
                               >
-                                ✓
-                              </button>
-                              <button
-                                onClick={handleCancelEdit}
-                                className="px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600"
-                              >
-                                ✗
-                              </button>
-                            </div>
-                          ) : (
-                            <div 
-                              className="max-w-xs truncate cursor-pointer hover:bg-gray-100 p-1 rounded"
-                              onClick={() => handleCellEdit(actualRowIndex, colIndex, value)}
-                            >
-                              {colName === 'STATUS' ? renderStatusBadge(value) :
-                               colName === 'CARTEIRA' ? renderCarteiraBadge(value) :
-                               colName === 'RETORNO' && value ? (
-                                 <span className="text-green-600 font-medium flex items-center">
-                                   <Clock className="w-3 h-3 mr-1" />
-                                   {value}
-                                 </span>
-                               ) :
-                               colName === 'OPERADOR' && value.toUpperCase() === 'LIVRE' ? (
-                                 <span className="text-green-600 font-medium flex items-center">
-                                   <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                                   {value}
-                                 </span>
-                               ) : (
-                                 <span title={value}>{value}</span>
-                               )}
-                            </div>
-                          )}
-                        </td>
-                      );
-                    })}
+                                {colName === 'STATUS' ? renderStatusBadge(value) :
+                                  colName === 'CARTEIRA' ? renderCarteiraBadge(value) :
+                                    colName === 'RETORNO' && value ? (
+                                      <span className="text-green-600 font-medium flex items-center">
+                                        <Clock className="w-3 h-3 mr-1" />
+                                        {value}
+                                      </span>
+                                    ) :
+                                      colName === 'OPERADOR' && value.toUpperCase() === 'LIVRE' ? (
+                                        <span className="text-green-600 font-medium flex items-center">
+                                          <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                                          {value}
+                                        </span>
+                                      ) : (
+                                        <span title={value}>{value}</span>
+                                      )}
+                              </div>
+                            )}
+                          </td>
+                        );
+                      })}
                   </tr>
                 );
               })}
@@ -940,20 +941,18 @@ const Spreadsheet: React.FC = () => {
                             type="text"
                             name="operador"
                             defaultValue={popup.dados.operador}
-                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                              darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-                            }`}
+                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                              }`}
                           />
                         </div>
-                        
+
                         <div>
                           <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Status</label>
                           <select
                             name="status"
                             defaultValue={popup.dados.status}
-                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                              darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-                            }`}
+                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                              }`}
                           >
                             <option value="EM ANÁLISE">EM ANÁLISE</option>
                             <option value="FINALIZADO">FINALIZADO</option>
@@ -978,9 +977,8 @@ const Spreadsheet: React.FC = () => {
                           <select
                             name="carteira"
                             defaultValue={popup.dados.carteira}
-                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                              darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-                            }`}
+                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                              }`}
                           >
                             <option value="ALEGRA">ALEGRA</option>
                             <option value="CABOTELECOM">CABOTELECOM</option>
@@ -1010,9 +1008,8 @@ const Spreadsheet: React.FC = () => {
                             type="text"
                             name="cidade"
                             defaultValue={popup.dados.cidade}
-                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                              darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-                            }`}
+                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                              }`}
                           />
                         </div>
 
@@ -1022,9 +1019,8 @@ const Spreadsheet: React.FC = () => {
                             type="text"
                             name="tecnico"
                             defaultValue={popup.dados.tecnico}
-                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                              darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-                            }`}
+                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                              }`}
                           />
                         </div>
 
@@ -1034,9 +1030,8 @@ const Spreadsheet: React.FC = () => {
                             type="text"
                             name="cliente"
                             defaultValue={popup.dados.cliente}
-                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                              darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-                            }`}
+                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                              }`}
                           />
                         </div>
                       </div>
@@ -1054,9 +1049,8 @@ const Spreadsheet: React.FC = () => {
                             type="text"
                             name="assunto"
                             defaultValue={popup.dados.assunto}
-                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                              darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-                            }`}
+                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                              }`}
                           />
                         </div>
 
@@ -1068,9 +1062,8 @@ const Spreadsheet: React.FC = () => {
                             key={formValues.descricao || popup.dados.descricao}
                             defaultValue={formValues.descricao || popup.dados.descricao}
                             onChange={(e) => setFormValues((prev: any) => ({ ...prev, descricao: e.target.value }))}
-                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                              darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900'
-                            }`}
+                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900'
+                              }`}
                             placeholder="Descreva detalhadamente o problema reportado..."
                           />
                         </div>
@@ -1082,7 +1075,7 @@ const Spreadsheet: React.FC = () => {
                         <Clock className="w-5 h-5 text-indigo-600" />
                         Histórico de Andamentos
                       </h3>
-                      
+
                       <div className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
                         <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Adicionar Andamento</label>
                         <div className="flex gap-3">
@@ -1091,9 +1084,8 @@ const Spreadsheet: React.FC = () => {
                             onChange={(e) => setNovoAndamento(e.target.value)}
                             placeholder="Descreva o andamento ou ação tomada..."
                             rows={3}
-                            className={`flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                              darkMode ? 'bg-gray-600 border-gray-500 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900'
-                            }`}
+                            className={`flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${darkMode ? 'bg-gray-600 border-gray-500 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900'
+                              }`}
                           />
                           <button
                             type="button"
@@ -1107,15 +1099,13 @@ const Spreadsheet: React.FC = () => {
                         </div>
                       </div>
 
-                      <div className={`border rounded-lg p-4 max-h-80 overflow-y-auto ${
-                        darkMode ? 'border-gray-600 bg-gray-700' : 'border-gray-200 bg-white'
-                      }`}>
+                      <div className={`border rounded-lg p-4 max-h-80 overflow-y-auto ${darkMode ? 'border-gray-600 bg-gray-700' : 'border-gray-200 bg-white'
+                        }`}>
                         {(formValues.descricao || popup.dados.descricao) ? (
                           <div className="space-y-4">
                             {(formValues.descricao || popup.dados.descricao).split('\n').filter(Boolean).map((andamento: string, index: number) => (
-                              <div key={index} className={`p-4 rounded-lg border-l-4 border-indigo-500 ${
-                                darkMode ? 'bg-gray-600' : 'bg-gray-50'
-                              }`}>
+                              <div key={index} className={`p-4 rounded-lg border-l-4 border-indigo-500 ${darkMode ? 'bg-gray-600' : 'bg-gray-50'
+                                }`}>
                                 <div className="flex items-start justify-between">
                                   <div className="flex-1">
                                     <p className={`text-sm whitespace-pre-wrap ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
@@ -1180,7 +1170,7 @@ const Spreadsheet: React.FC = () => {
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                         />
                       </div>
-                      
+
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Cliente *</label>
                         <input
@@ -1236,7 +1226,7 @@ const Spreadsheet: React.FC = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                        <select 
+                        <select
                           defaultValue="EM ANÁLISE"
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                         >
@@ -1269,23 +1259,21 @@ const Spreadsheet: React.FC = () => {
               )}
             </div>
 
-            <div className={`p-6 border-t flex justify-between ${
-              darkMode ? 'border-gray-600 bg-gray-700' : 'border-gray-200 bg-gray-50'
-            }`}>
+            <div className={`p-6 border-t flex justify-between ${darkMode ? 'border-gray-600 bg-gray-700' : 'border-gray-200 bg-gray-50'
+              }`}>
               <button
                 onClick={fecharPopup}
-                className={`px-6 py-2 border rounded-lg ${
-                  darkMode ? 'border-gray-500 text-gray-300 hover:bg-gray-600' : 'border-gray-300 text-gray-700 hover:bg-gray-50'
-                }`}
+                className={`px-6 py-2 border rounded-lg ${darkMode ? 'border-gray-500 text-gray-300 hover:bg-gray-600' : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
               >
                 Cancelar
               </button>
-              
+
               <div className="flex space-x-3">
                 {popup.tipo === 'detalhes' && (
                   <>
                     {!popup.dados?.retorno && (
-                      <button 
+                      <button
                         type="button"
                         onClick={() => pegarChamado(popup.dados, popup.linha!)}
                         className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center space-x-2"
@@ -1294,7 +1282,7 @@ const Spreadsheet: React.FC = () => {
                         <span>Pegar Chamado</span>
                       </button>
                     )}
-                    <button 
+                    <button
                       type="button"
                       onClick={salvarAlteracoesPopup}
                       className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center space-x-2"
