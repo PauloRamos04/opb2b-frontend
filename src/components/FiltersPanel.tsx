@@ -5,7 +5,11 @@ interface FiltersPanelProps {
   mostrarFiltros: boolean;
   filtrosAvancados: any;
   setFiltrosAvancados: (filtros: any) => void;
-  valoresUnicos: any;
+  valoresUnicos: {
+    operadores: string[];
+    status: string[];
+    carteiras: string[];
+  };
   colunasVisiveis: any;
   setColunasVisiveis: (colunas: any) => void;
   limparFiltros: () => void;
@@ -61,7 +65,7 @@ const FiltersPanel: React.FC<FiltersPanelProps> = ({
             }`}
           >
             <option value="">Todos os operadores</option>
-            {valoresUnicos.operadores.map((op: boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | Promise<React.AwaitedReactNode> | React.Key | null | undefined) => (
+            {valoresUnicos.operadores.map((op) => (
               <option key={op} value={op}>{op}</option>
             ))}
           </select>
@@ -81,7 +85,7 @@ const FiltersPanel: React.FC<FiltersPanelProps> = ({
             }`}
           >
             <option value="">Todos os status</option>
-            {valoresUnicos.status.map((status: boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | Promise<React.AwaitedReactNode> | React.Key | null | undefined) => (
+            {valoresUnicos.status.map((status) => (
               <option key={status} value={status}>{status}</option>
             ))}
           </select>
@@ -101,7 +105,7 @@ const FiltersPanel: React.FC<FiltersPanelProps> = ({
             }`}
           >
             <option value="">Todas as carteiras</option>
-            {valoresUnicos.carteiras.map((carteira: boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | Promise<React.AwaitedReactNode> | React.Key | null | undefined) => (
+            {valoresUnicos.carteiras.map((carteira) => (
               <option key={carteira} value={carteira}>{carteira}</option>
             ))}
           </select>
@@ -117,7 +121,7 @@ const FiltersPanel: React.FC<FiltersPanelProps> = ({
             <label key={coluna} className="flex items-center space-x-2 text-sm">
               <input
                 type="checkbox"
-                checked={visivel}
+                checked={visivel as boolean}
                 onChange={(e) => setColunasVisiveis((prev: any) => ({ ...prev, [coluna]: e.target.checked }))}
                 className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
               />
