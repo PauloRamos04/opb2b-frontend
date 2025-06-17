@@ -327,7 +327,7 @@ const Spreadsheet: React.FC = () => {
           dados: { ...prev.dados, descricao: novoValor }
         }));
         
-        setFormValues(prev => ({
+        setFormValues((prev: any) => ({
           ...prev,
           descricao: novoValor
         }));
@@ -1067,7 +1067,7 @@ const Spreadsheet: React.FC = () => {
                             rows={6}
                             key={formValues.descricao || popup.dados.descricao}
                             defaultValue={formValues.descricao || popup.dados.descricao}
-                            onChange={(e) => setFormValues(prev => ({ ...prev, descricao: e.target.value }))}
+                            onChange={(e) => setFormValues((prev: any) => ({ ...prev, descricao: e.target.value }))}
                             className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
                               darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900'
                             }`}
