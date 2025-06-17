@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { apiService } from '../services/api.service';
 import { toast } from 'react-hot-toast';
 
@@ -18,7 +18,7 @@ interface SpreadsheetContextType {
   loading: boolean;
   error: string | null;
   loadData: () => Promise<void>;
-  updateCell: (row: number, col: number, value: string) => Promise<void>;
+  updateCell: (row: number, col: number, value: string) => Promise<{ success: boolean; message: string }>;
   criarNovoChamado: (dados: NovoChamadoData) => Promise<void>;
   isConnected: boolean;
   filters: any;
@@ -47,27 +47,7 @@ export const SpreadsheetProvider: React.FC<SpreadsheetProviderProps> = ({ childr
   const [isConnected, setIsConnected] = useState(false);
   const [filters, setFilters] = useState({});
 
-  useEffect(() => {
-    const checkConnection = async () => {
-      try {
-        const response = await apiService.getStatus();
-        setIsConnected(response.success);
-        if (response.success) {
-          console.log('✅ Conectado ao servidor');
-        }
-      } catch (error) {
-        setIsConnected(false);
-        console.error('❌ Erro de conexão:', error);
-      }
-    };
-
-    checkConnection();
-    loadData();
-    const interval = setInterval(checkConnection, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -93,13 +73,33 @@ export const SpreadsheetProvider: React.FC<SpreadsheetProviderProps> = ({ childr
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const refreshData = async () => {
+  const refreshData = useCallback(async () => {
     await loadData();
-  };
+  }, [loadData]);
 
-  const updateCell = async (row: number, col: number, value: string) => {
+  const checkConnection = useCallback(async () => {
+    try {
+      const response = await apiService.getStatus();
+      setIsConnected(response.success);
+      if (response.success) {
+        console.log('✅ Conectado ao servidor');
+      }
+    } catch (error) {
+      setIsConnected(false);
+      console.error('❌ Erro de conexão:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    checkConnection();
+    loadData();
+    const interval = setInterval(checkConnection, 30000);
+    return () => clearInterval(interval);
+  }, [checkConnection, loadData]);
+
+  const updateCell = useCallback(async (row: number, col: number, value: string) => {
     try {
       console.log(`📝 Atualizando célula [${row}, ${col}] = "${value}"`);
       const response = await apiService.updateCell({ row, col, value });
@@ -108,19 +108,17 @@ export const SpreadsheetProvider: React.FC<SpreadsheetProviderProps> = ({ childr
         console.log('✅ Célula atualizada com sucesso');
         toast.success('Célula atualizada');
         await refreshData();
-        return response;
-      } else {
-        throw new Error(response.message || 'Erro ao atualizar célula');
       }
+      return response;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro desconhecido';
       console.error('❌ Erro ao atualizar célula:', err);
       toast.error(`Erro: ${errorMessage}`);
       throw err;
     }
-  };
+  }, [refreshData]);
 
-  const criarNovoChamado = async (dados: NovoChamadoData) => {
+  const criarNovoChamado = useCallback(async (dados: NovoChamadoData) => {
     try {
       console.log('📝 Criando novo chamado:', dados);
       const response = await apiService.criarChamado(dados);
@@ -138,7 +136,7 @@ export const SpreadsheetProvider: React.FC<SpreadsheetProviderProps> = ({ childr
       toast.error(`Erro: ${errorMessage}`);
       throw err;
     }
-  };
+  }, [refreshData]);
 
   return (
     <SpreadsheetContext.Provider
