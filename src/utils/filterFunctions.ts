@@ -1,6 +1,4 @@
-// src/utils/functions.ts
-
-import { FilterState } from '@/types/filters';
+import { FilterState } from '@/constants/spreadsheet';
 
 export const getUniqueValues = (values: string[]): string[] => {
   const unique: string[] = [];
