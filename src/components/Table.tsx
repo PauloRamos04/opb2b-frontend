@@ -57,17 +57,15 @@ const Table: React.FC<TableProps> = ({
         <table className="w-full table-auto">
           <thead className={darkMode ? 'bg-gray-700' : 'bg-gray-50'}>
             <tr>
-              <th className={`px-4 py-3 text-left text-xs font-medium uppercase tracking-wider border-b ${
-                darkMode ? 'text-gray-50 border-gray-600' : 'text-gray-500 border-gray-200'
-              }`}>
+              <th className={`px-4 py-3 text-left text-xs font-medium uppercase tracking-wider border-b ${darkMode ? 'text-gray-50 border-gray-600' : 'text-gray-500 border-gray-200'
+                }`}>
                 Ações
               </th>
               {TABLE_COLUMN_ORDER
                 .filter(colName => colunasVisiveis[colName as keyof typeof colunasVisiveis])
                 .map((colName) => (
-                  <th key={colName} className={`px-4 py-3 text-left text-xs font-medium uppercase tracking-wider border-b ${
-                    darkMode ? 'text-gray-50 border-gray-600' : 'text-gray-500 border-gray-200'
-                  }`}>
+                  <th key={colName} className={`px-4 py-3 text-left text-xs font-medium uppercase tracking-wider border-b ${darkMode ? 'text-gray-50 border-gray-600' : 'text-gray-500 border-gray-200'
+                    }`}>
                     {colName}
                   </th>
                 ))}
@@ -108,16 +106,28 @@ const Table: React.FC<TableProps> = ({
                         <Edit className="w-4 h-4" />
                         <span>Editar</span>
                       </button>
-                      {!temRetorno && (
-                        <button
-                          onClick={() => pegarChamado(dadosRow, actualRowIndex)}
-                          className="flex items-center space-x-1 px-3 py-1 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 text-sm transition-colors"
-                          title="Pegar chamado (definir horário de retorno)"
-                        >
-                          <PhoneCall className="w-4 h-4" />
-                          <span>Pegar</span>
-                        </button>
-                      )}
+                      <button
+                        onClick={() => {
+                          if (!temRetorno) {
+                            pegarChamado(dadosRow, actualRowIndex);
+                          }
+                        }}
+                        disabled={!!temRetorno}
+                        className={`flex items-center space-x-1 px-3 py-1 rounded-lg text-sm transition-colors ${temRetorno
+                            ? darkMode
+                              ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                              : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                            : 'bg-green-100 text-green-700 hover:bg-green-200'
+                          }`}
+                        title={
+                          temRetorno
+                            ? "Chamado já atribuído"
+                            : "Pegar chamado (definir horário de retorno)"
+                        }
+                      >
+                        <PhoneCall className="w-4 h-4" />
+                        <span>Pegar</span>
+                      </button>
                     </div>
                   </td>
                   {TABLE_COLUMN_ORDER
@@ -126,9 +136,8 @@ const Table: React.FC<TableProps> = ({
                       const value = getCellValue(row, colName);
 
                       return (
-                        <td key={colName} className={`px-4 py-4 whitespace-nowrap text-sm border-b ${
-                          darkMode ? 'text-white border-gray-700' : 'text-gray-600 border-gray-300'
-                        }`}>
+                        <td key={colName} className={`px-4 py-4 whitespace-nowrap text-sm border-b ${darkMode ? 'text-white border-gray-700' : 'text-gray-600 border-gray-300'
+                          }`}>
                           <div className="max-w-xs">
                             {colName === 'STATUS' ? (
                               <div className="inline-block">
@@ -149,7 +158,7 @@ const Table: React.FC<TableProps> = ({
                                 {value}
                               </span>
                             ) : (
-                              <span 
+                              <span
                                 title={value}
                                 className={`${darkMode ? 'text-gray-200' : 'text-gray-900'} truncate block`}
                               >
