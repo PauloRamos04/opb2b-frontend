@@ -37,7 +37,8 @@ export const CARTEIRAS_LIST = [
   'WAYNET',
   'WEBNET',
   'WEBBY',
-  'AZZA'
+  'AZZA',
+  'LIVRE'
 ];
 
 export const STATUS_CLASSES = {
