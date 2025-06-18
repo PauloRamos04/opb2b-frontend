@@ -47,6 +47,7 @@ const Spreadsheet: React.FC = () => {
     ...INITIAL_FILTER_STATE,
     status: [],
     carteira: [],
+    operador: [],
     tags: []
   });
   

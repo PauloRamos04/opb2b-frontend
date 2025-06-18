@@ -29,13 +29,13 @@ export const filterData = (
       if (!hasMatch) return false;
     }
 
-    // Filtro por operador
+    /* Filtro por operador
     if (filters.operador && filters.operador.trim() !== '') {
       const operador = row[columnIndices.OPERADOR] || '';
       if (!operador.toLowerCase().includes(filters.operador.toLowerCase())) {
         return false;
       }
-    }
+    } */
 
     // Filtro por múltiplos status
     if (filters.status && filters.status.length > 0) {
@@ -49,6 +49,14 @@ export const filterData = (
     if (filters.carteira && filters.carteira.length > 0) {
       const carteira = row[columnIndices.CARTEIRA] || '';
       if (!filters.carteira.includes(carteira)) {
+        return false;
+      }
+    }
+
+    //Filtro por multiplos operadores
+    if (filters.operador && filters.operador.length > 0) {
+      const operador = row[columnIndices.OPERADOR] || '';
+      if (!filters.operador.includes(operador)) {
         return false;
       }
     }

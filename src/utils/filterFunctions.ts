@@ -28,9 +28,9 @@ export const filterData = (
     }
 
     // Filtro por operador
-    if (filters.operador && filters.operador.trim() !== '') {
+    if (filters.operador && filters.operador.length > 0) {
       const operador = row[columnIndices.OPERADOR] || '';
-      if (!operador.toLowerCase().includes(filters.operador.toLowerCase())) {
+      if (!filters.status.includes(operador)) {
         return false;
       }
     }

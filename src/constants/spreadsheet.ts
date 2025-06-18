@@ -1,4 +1,7 @@
 // src/constants/spreadsheet.ts
+export const OPERADOR_LIST = [
+  'B2B | Paulo F'
+];
 
 export const STATUS_LIST = [
   'EM ANÁLISE',
@@ -56,6 +59,10 @@ export const STATUS_CLASSES = {
   'AGUARDANDO - TELEFONIA': 'bg-cyan-500 text-white',
   'AGUARDANDO - REDE EXTERNA': 'bg-lime-500 text-black',
   'AGUARDANDO - OPERAÇÕES B2B': 'bg-yellow-500 text-black'
+};
+
+export const OPERADOR_CLASSES = {
+  'B2B | Paulo F' : 'bg-red-400 text-white'
 };
 
 export const CARTEIRA_CLASSES = {
@@ -170,7 +177,7 @@ export const FIELD_MAPPING = {
 
 // INTERFACE FILTERSTATE AQUI MESMO
 export interface FilterState {
-  operador: string;
+  operador: string[];
   servico: string;
   status: string[];
   carteira: string[];
@@ -199,7 +206,7 @@ export interface FilterState {
 
 // Estado inicial dos filtros
 export const INITIAL_FILTER_STATE: FilterState = {
-  operador: '',
+  operador: [],
   servico: '',
   status: [],
   carteira: [],
@@ -229,5 +236,6 @@ export const INITIAL_FILTER_STATE: FilterState = {
 // Tipos TypeScript
 export type StatusType = typeof STATUS_LIST[number];
 export type CarteiraType = typeof CARTEIRAS_LIST[number];
+export type OperadorType = typeof OPERADOR_LIST[number];
 export type ColumnNameType = typeof TABLE_COLUMN_ORDER[number];
 export type FieldMappingType = keyof typeof FIELD_MAPPING;

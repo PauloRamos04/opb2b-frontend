@@ -1,7 +1,7 @@
 // src/types/filters.ts
 
 export interface FilterState {
-  operador: string;
+  operador: string[];
   servico: string;
   status: string[];
   carteira: string[];

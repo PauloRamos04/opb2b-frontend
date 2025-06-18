@@ -42,15 +42,15 @@ const FiltersPanel: React.FC<FiltersPanelProps> = ({
               placeholder="Buscar em todos os campos..."
               value={filtrosAvancados.buscaGeral}
               onChange={(e) => setFiltrosAvancados((prev: any) => ({ ...prev, buscaGeral: e.target.value }))}
-              className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                darkMode 
-                  ? 'bg-gray-600 border-gray-500 text-white placeholder-gray-400' 
-                  : 'bg-white border-gray-300 text-gray-900'
-              }`}
+              className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${darkMode
+                ? 'bg-gray-600 border-gray-500 text-white placeholder-gray-400'
+                : 'bg-white border-gray-300 text-gray-900'
+                }`}
             />
           </div>
         </div>
 
+        {/**Operador */}
         <div>
           <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
             Operador
@@ -58,11 +58,10 @@ const FiltersPanel: React.FC<FiltersPanelProps> = ({
           <select
             value={filtrosAvancados.operador}
             onChange={(e) => setFiltrosAvancados((prev: any) => ({ ...prev, operador: e.target.value }))}
-            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-              darkMode 
-                ? 'bg-gray-600 border-gray-500 text-white' 
-                : 'bg-white border-gray-300 text-gray-900'
-            }`}
+            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${darkMode
+              ? 'bg-gray-600 border-gray-500 text-white'
+              : 'bg-white border-gray-300 text-gray-900'
+              }`}
           >
             <option value="">Todos os operadores</option>
             {valoresUnicos.operadores.map((op) => (
@@ -71,6 +70,7 @@ const FiltersPanel: React.FC<FiltersPanelProps> = ({
           </select>
         </div>
 
+        {/*status */}
         <div>
           <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
             Status
@@ -78,11 +78,10 @@ const FiltersPanel: React.FC<FiltersPanelProps> = ({
           <select
             value={filtrosAvancados.status}
             onChange={(e) => setFiltrosAvancados((prev: any) => ({ ...prev, status: e.target.value }))}
-            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-              darkMode 
-                ? 'bg-gray-600 border-gray-500 text-white' 
-                : 'bg-white border-gray-300 text-gray-900'
-            }`}
+            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${darkMode
+              ? 'bg-gray-600 border-gray-500 text-white'
+              : 'bg-white border-gray-300 text-gray-900'
+              }`}
           >
             <option value="">Todos os status</option>
             {valoresUnicos.status.map((status) => (
@@ -91,6 +90,7 @@ const FiltersPanel: React.FC<FiltersPanelProps> = ({
           </select>
         </div>
 
+        {/**Carteira */}
         <div>
           <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
             Carteira
@@ -98,11 +98,10 @@ const FiltersPanel: React.FC<FiltersPanelProps> = ({
           <select
             value={filtrosAvancados.carteira}
             onChange={(e) => setFiltrosAvancados((prev: any) => ({ ...prev, carteira: e.target.value }))}
-            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-              darkMode 
-                ? 'bg-gray-600 border-gray-500 text-white' 
-                : 'bg-white border-gray-300 text-gray-900'
-            }`}
+            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${darkMode
+              ? 'bg-gray-600 border-gray-500 text-white'
+              : 'bg-white border-gray-300 text-gray-900'
+              }`}
           >
             <option value="">Todas as carteiras</option>
             {valoresUnicos.carteiras.map((carteira) => (
@@ -139,17 +138,15 @@ const FiltersPanel: React.FC<FiltersPanelProps> = ({
         >
           Limpar todos os filtros
         </button>
-        
+
         <div className="flex space-x-2">
-          <button className={`flex items-center space-x-2 px-3 py-1 text-sm rounded hover:bg-opacity-80 ${
-            darkMode ? 'bg-gray-600 text-gray-200' : 'bg-gray-100 text-gray-700'
-          }`}>
+          <button className={`flex items-center space-x-2 px-3 py-1 text-sm rounded hover:bg-opacity-80 ${darkMode ? 'bg-gray-600 text-gray-200' : 'bg-gray-100 text-gray-700'
+            }`}>
             <Download className="w-4 h-4" />
             <span>Exportar</span>
           </button>
-          <button className={`flex items-center space-x-2 px-3 py-1 text-sm rounded hover:bg-opacity-80 ${
-            darkMode ? 'bg-gray-600 text-gray-200' : 'bg-gray-100 text-gray-700'
-          }`}>
+          <button className={`flex items-center space-x-2 px-3 py-1 text-sm rounded hover:bg-opacity-80 ${darkMode ? 'bg-gray-600 text-gray-200' : 'bg-gray-100 text-gray-700'
+            }`}>
             <Upload className="w-4 h-4" />
             <span>Importar</span>
           </button>
