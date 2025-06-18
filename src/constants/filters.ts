@@ -164,7 +164,7 @@ export const FIELD_MAPPING = {
   'cidade': 'CIDADE',
   'tecnico': 'TEC',
   'cliente': 'CLIENTE',
-  'assunto': 'ASSUNTO',
+  'assuntos': 'ASSUNTO',
   'descricao': 'DESCRIÇÃO'
 };
 
@@ -181,7 +181,7 @@ export const INITIAL_FILTER_STATE = {
   buscaGeral: '',
   prioridade: '',
   cliente: '',
-  assunto: '',
+  assuntos: '',
   descricao: '',
   uf: '',
   regional: '',

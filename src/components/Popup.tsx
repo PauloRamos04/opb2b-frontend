@@ -184,8 +184,8 @@ const Popup: React.FC<PopupProps> = ({
                       <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Assunto</label>
                       <input
                         type="text"
-                        name="assunto"
-                        defaultValue={popup.dados.assunto}
+                        name="assuntos"
+                        defaultValue={popup.dados.assuntos}
                         className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
                           darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
                         }`}

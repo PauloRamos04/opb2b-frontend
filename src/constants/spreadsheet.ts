@@ -1,6 +1,16 @@
-// src/constants/spreadsheet.ts
 export const OPERADOR_LIST = [
-  'B2B | Paulo F'
+  'B2B | Dione',
+  'B2B | Gustavo',
+  'B2B | Jessica',
+  'B2B | Leonardo',
+  'B2B | Matheus',
+  'B2B | Nickolas',
+  'B2B | Paulo F',
+  'B2B | Raphael',
+  'B2B | Yan',
+  'LIVRE',
+  'S.I | Matheus',
+  'S.I | Mosca'
 ];
 
 export const STATUS_LIST = [
@@ -62,7 +72,18 @@ export const STATUS_CLASSES = {
 };
 
 export const OPERADOR_CLASSES = {
-  'B2B | Paulo F' : 'bg-red-400 text-white'
+  'B2B | Dione': 'bg-red-400 text-white',
+  'B2B | Gustavo': 'bg-red-400 text-white',
+  'B2B | Jessica': 'bg-red-400 text-white',
+  'B2B | Leonardo': 'bg-red-400 text-white',
+  'B2B | Matheus': 'bg-red-400 text-white',
+  'B2B | Nickolas': 'bg-red-400 text-white',
+  'B2B | Paulo F': 'bg-red-400 text-white',
+  'B2B | Raphael': 'bg-red-400 text-white',
+  'B2B | Yan': 'bg-red-400 text-white',
+  'LIVRE': 'bg-red-400 text-white',
+  'S.I | Matheus': 'bg-red-400 text-white',
+  'S.I | Mosca': 'bg-red-400 text-white'
 };
 
 export const CARTEIRA_CLASSES = {
@@ -171,7 +192,7 @@ export const FIELD_MAPPING = {
   'cidade': 'CIDADE',
   'tecnico': 'TEC',
   'cliente': 'CLIENTE',
-  'assunto': 'ASSUNTO',
+  'assuntos': 'ASSUNTO',
   'descricao': 'DESCRIÇÃO'
 };
 
@@ -188,7 +209,7 @@ export interface FilterState {
   buscaGeral: string;
   prioridade: string;
   cliente: string;
-  assunto: string;
+  assuntos: string;
   descricao: string;
   uf: string;
   regional: string;
@@ -217,7 +238,7 @@ export const INITIAL_FILTER_STATE: FilterState = {
   buscaGeral: '',
   prioridade: '',
   cliente: '',
-  assunto: '',
+  assuntos: '',
   descricao: '',
   uf: '',
   regional: '',

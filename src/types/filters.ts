@@ -1,5 +1,3 @@
-// src/types/filters.ts
-
 export interface FilterState {
   operador: string[];
   servico: string;
@@ -12,7 +10,7 @@ export interface FilterState {
   buscaGeral: string;
   prioridade: string;
   cliente: string;
-  assunto: string;
+  assuntos: string;
   descricao: string;
   uf: string;
   regional: string;

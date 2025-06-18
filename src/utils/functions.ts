@@ -1,5 +1,3 @@
-// src/utils/functions.ts
-
 import { FilterState } from '@/types/filters';
 
 export const getUniqueValues = (values: string[]): string[] => {
@@ -85,10 +83,10 @@ export const filterData = (
       }
     }
 
-    // Filtro por assunto
-    if (filters.assunto && filters.assunto.trim() !== '') {
-      const assunto = row[columnIndices.ASSUNTO] || '';
-      if (!assunto.toLowerCase().includes(filters.assunto.toLowerCase())) {
+    // Filtro por assuntos
+    if (filters.assuntos && filters.assuntos.trim() !== '') {
+      const assuntos = row[columnIndices.ASSUNTO] || '';
+      if (!assuntos.toLowerCase().includes(filters.assuntos.toLowerCase())) {
         return false;
       }
     }

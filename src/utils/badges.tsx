@@ -1,5 +1,3 @@
-// src/utils/badges.tsx
-
 import React from 'react';
 import { STATUS_CLASSES, CARTEIRA_CLASSES, OPERADOR_CLASSES } from '@/constants/spreadsheet';
 

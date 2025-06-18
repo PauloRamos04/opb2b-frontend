@@ -85,7 +85,7 @@ const Table: React.FC<TableProps> = ({
                 servico: getCellValue(row, 'SERVIÇO'),
                 status: getCellValue(row, 'STATUS'),
                 retorno: getCellValue(row, 'RETORNO'),
-                assunto: getCellValue(row, 'ASSUNTO'),
+                assuntos: getCellValue(row, 'ASSUNTO'),
                 carteira: getCellValue(row, 'CARTEIRA'),
                 cidade: getCellValue(row, 'CIDADE'),
                 tecnico: getCellValue(row, 'TEC'),

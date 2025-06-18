@@ -23,6 +23,7 @@ interface HeaderProps {
     status: string[];
     carteiras: string[];
     cidades: string[];
+    assuntos: string[];
     tecnicos: string[];
     clientes: string[];
     ufs: string[];
