@@ -137,72 +137,66 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
   }, [colunasVisiveis]);
 
   return (
-    <div className="relative w-full">
-      <div className="flex items-center space-x-3 w-full justify-between">
-        <div className="flex items-center space-x-3">
-          <button
-            onClick={() => setMostrarFiltros(!mostrarFiltros)}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-lg border transition-colors ${mostrarFiltros
-              ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
-              : darkMode
-                ? 'bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600'
-                : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-              }`}
-          >
-            <Filter className="w-4 h-4" />
-            <span>Filtros</span>
-            {filtrosAtivosCount > 0 && (
-              <span className="bg-indigo-600 text-white text-xs rounded-full px-2 py-1 min-w-[20px] text-center">
-                {filtrosAtivosCount}
-              </span>
-            )}
-            <ChevronDown className={`w-4 h-4 transition-transform ${mostrarFiltros ? 'rotate-180' : ''}`} />
-          </button>
-
-          <div className="flex items-center space-x-2">
-            <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-              {filteredDataLength} chamados
-            </span>
-            <span className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-              • {colunasVisiveisCount} colunas visíveis
-            </span>
-          </div>
-        </div>
-
-        <button
-          className={`flex items-center space-x-2 px-3 py-2 text-sm rounded hover:bg-opacity-80 ${darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'
-            }`}
-        >
-          <RotateCcw className="w-4 h-4" />
-          <span>Atualizar</span>
-        </button>
-      </div>
+    <div className="relative">
+      <button
+        onClick={() => setMostrarFiltros(!mostrarFiltros)}
+        className={`flex items-center space-x-2 px-4 py-2 rounded-lg border transition-colors ${mostrarFiltros
+          ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
+          : darkMode
+            ? 'bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600'
+            : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+          }`}
+      >
+        <Filter className="w-4 h-4" />
+        <span>Filtros</span>
+        {filtrosAtivosCount > 0 && (
+          <span className="bg-indigo-600 text-white text-xs rounded-full px-2 py-1 min-w-[20px] text-center">
+            {filtrosAtivosCount}
+          </span>
+        )}
+        <ChevronDown className={`w-4 h-4 transition-transform ${mostrarFiltros ? 'rotate-180' : ''}`} />
+      </button>
 
       {mostrarFiltros && (
-        <div className={`absolute top-full left-0 right-0 mt-2 border rounded-lg shadow-lg z-50 ${darkMode ? 'bg-gray-800 border-gray-600' : 'bg-white border-gray-200'}`}
-          style={{ maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }}>
+        <div className={`absolute top-full right-0 mt-2 border rounded-lg shadow-xl z-50 ${darkMode ? 'bg-gray-800 border-gray-600' : 'bg-white border-gray-200'}`}
+          style={{
+            maxHeight: 'calc(100vh - 200px)',
+            overflowY: 'auto',
+            width: '750px',
+            minWidth: '400px',
+            maxWidth: 'calc(100vw - 32px)'
+          }}>
           <div className="p-6">
-            <div className="flex space-x-1 mb-6">
-              {[
-                { id: 'basico', label: 'Filtros', icon: Search },
-                { id: 'colunas', label: 'Colunas', icon: Eye }
-              ].map(({ id, label, icon: Icon }) => (
-                <button
-                  key={id}
-                  onClick={() => setActiveTab(id as any)}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === id
-                    ? darkMode 
-                      ? 'bg-indigo-900 text-indigo-300 border border-indigo-700'
-                      : 'bg-indigo-100 text-indigo-700 border border-indigo-200'
-                    : darkMode
-                      ? 'text-gray-300 hover:bg-gray-700'
-                      : 'text-gray-600 hover:bg-gray-100'
-                    }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  <span>{label}</span>
-                </button>
-              ))}
+            <div className="flex justify-between items-center mb-6">
+              <div className="flex space-x-1">
+                {[
+                  { id: 'basico', label: 'Filtros', icon: Search },
+                  { id: 'colunas', label: 'Colunas', icon: Eye }
+                ].map(({ id, label, icon: Icon }) => (
+                  <button
+                    key={id}
+                    onClick={() => setActiveTab(id as any)}
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === id
+                      ? darkMode
+                        ? 'bg-indigo-900 text-indigo-300 border border-indigo-700'
+                        : 'bg-indigo-100 text-indigo-700 border border-indigo-200'
+                      : darkMode
+                        ? 'text-gray-300 hover:bg-gray-700'
+                        : 'text-gray-600 hover:bg-gray-100'
+                      }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span>{label}</span>
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => setMostrarFiltros(false)}
+                className={`p-2 rounded-lg ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
 
             {activeTab === 'basico' && (
