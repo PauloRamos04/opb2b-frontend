@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { apiService } from '../services/api.service';
+import { useAuth } from './AuthContext';
 import { toast } from 'react-hot-toast';
 
 export interface NovoChamadoData {
@@ -46,8 +47,15 @@ export const SpreadsheetProvider: React.FC<SpreadsheetProviderProps> = ({ childr
   const [error, setError] = useState<string | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [filters, setFilters] = useState({});
+  
+  const { isAuthenticated, user } = useAuth();
 
   const loadData = useCallback(async () => {
+    if (!isAuthenticated) {
+      setError('Usuário não autenticado');
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -73,13 +81,15 @@ export const SpreadsheetProvider: React.FC<SpreadsheetProviderProps> = ({ childr
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isAuthenticated]);
 
   const refreshData = useCallback(async () => {
     await loadData();
   }, [loadData]);
 
   const checkConnection = useCallback(async () => {
+    if (!isAuthenticated) return;
+
     try {
       const response = await apiService.getStatus();
       setIsConnected(response.success);
@@ -90,18 +100,25 @@ export const SpreadsheetProvider: React.FC<SpreadsheetProviderProps> = ({ childr
       setIsConnected(false);
       console.error('❌ Erro de conexão:', error);
     }
-  }, []);
+  }, [isAuthenticated]);
 
   useEffect(() => {
-    checkConnection();
-    loadData();
-    const interval = setInterval(checkConnection, 30000);
-    return () => clearInterval(interval);
-  }, [checkConnection, loadData]);
+    if (isAuthenticated) {
+      checkConnection();
+      loadData();
+      const interval = setInterval(checkConnection, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [isAuthenticated, checkConnection, loadData]);
 
   const updateCell = useCallback(async (row: number, col: number, value: string) => {
+    if (!isAuthenticated || !user) {
+      toast.error('Usuário não autenticado');
+      return { success: false, message: 'Usuário não autenticado' };
+    }
+
     try {
-      console.log(`📝 Atualizando célula [${row}, ${col}] = "${value}"`);
+      console.log(`📝 Atualizando célula [${row}, ${col}] = "${value}" por ${user.operador}`);
       const response = await apiService.updateCell({ row, col, value });
       
       if (response.success) {
@@ -116,11 +133,16 @@ export const SpreadsheetProvider: React.FC<SpreadsheetProviderProps> = ({ childr
       toast.error(`Erro: ${errorMessage}`);
       throw err;
     }
-  }, [refreshData]);
+  }, [isAuthenticated, user, refreshData]);
 
   const criarNovoChamado = useCallback(async (dados: NovoChamadoData) => {
+    if (!isAuthenticated || !user) {
+      toast.error('Usuário não autenticado');
+      return;
+    }
+
     try {
-      console.log('📝 Criando novo chamado:', dados);
+      console.log('📝 Criando novo chamado:', dados, 'por', user.operador);
       const response = await apiService.criarChamado(dados);
       
       if (response.success) {
@@ -136,7 +158,7 @@ export const SpreadsheetProvider: React.FC<SpreadsheetProviderProps> = ({ childr
       toast.error(`Erro: ${errorMessage}`);
       throw err;
     }
-  }, [refreshData]);
+  }, [isAuthenticated, user, refreshData]);
 
   return (
     <SpreadsheetContext.Provider

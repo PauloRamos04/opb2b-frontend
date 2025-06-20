@@ -156,23 +156,43 @@ const Spreadsheet: React.FC = () => {
       const hora = agora.getHours().toString().padStart(2, '0');
       const minutos = agora.getMinutes().toString().padStart(2, '0');
       const dataFormatada = `${dia}/${mes} ${hora}:${minutos}`;
-      const colIndex = COLUMN_INDICES['RETORNO'];
-
-      const response = await fetch(`${API_BASE_URL}/spreadsheet/update-cell`, {
+      const retornoColIndex = COLUMN_INDICES['RETORNO'];
+      const operadorColIndex = COLUMN_INDICES['OPERADOR'];
+  
+      const operador = JSON.parse(localStorage.getItem('auth_user') || '{}')?.operador || 'DESCONHECIDO';
+  
+      // Atualiza a coluna de RETORNO (data/hora)
+      const updateRetorno = fetch(`${API_BASE_URL}/spreadsheet/update-cell`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           row: actualRowIndex,
-          col: colIndex,
+          col: retornoColIndex,
           value: dataFormatada
         })
       });
-
-      const result = await response.json();
-      if (!result.success) {
-        throw new Error(result.message || 'Erro ao atualizar célula');
+  
+      // Atualiza a coluna de OPERADOR
+      const updateOperador = fetch(`${API_BASE_URL}/spreadsheet/update-cell`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          row: actualRowIndex,
+          col: operadorColIndex,
+          value: operador
+        })
+      });
+  
+      // Aguarda ambas atualizações
+      const [resRetorno, resOperador] = await Promise.all([updateRetorno, updateOperador]);
+  
+      const resultRetorno = await resRetorno.json();
+      const resultOperador = await resOperador.json();
+  
+      if (!resultRetorno.success || !resultOperador.success) {
+        throw new Error('Erro ao atualizar células de retorno ou operador');
       }
-
+  
       alert(`✅ Chamado #${dadosRow.historico} pego com sucesso!`);
       await refreshData();
     } catch (error) {
@@ -181,6 +201,7 @@ const Spreadsheet: React.FC = () => {
       alert(`❌ Erro ao pegar chamado: ${errorMessage}`);
     }
   };
+  
 
   const adicionarAndamento = async (e?: React.MouseEvent) => {
     if (e) {

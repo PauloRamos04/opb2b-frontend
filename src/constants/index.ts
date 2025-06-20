@@ -146,8 +146,8 @@ export const DEFAULT_VISIBLE_COLUMNS = {
 export const DATA_START_ROW = 8;
 
 export const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://opb2b-backend-production.up.railway.app' 
-  : 'http://localhost:3001';
+  ? 'https://opb2b-backend-production.up.railway.app/api' 
+  : 'http://localhost:3001/api';
 
 export const FIELD_MAPPING = {
   'operador': 'OPERADOR', 'servico': 'SERVIÇO', 'status': 'STATUS',

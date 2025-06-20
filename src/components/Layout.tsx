@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Home, Menu, X, Sun, Moon } from 'lucide-react';
+import { Home, Menu, X, Sun, Moon, LogOut, User } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -11,9 +12,10 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { darkMode, toggleDarkMode } = useTheme();
+  const { user, logout } = useAuth();
 
   const menuItems = [
-    { icon: Home, label: 'Dashboard', href: '/', active: true },
+    { icon: Home, label: 'Dashboard', href: '/dashboard', active: true },
   ];
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
@@ -55,6 +57,27 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               );
             })}
           </nav>
+
+          {sidebarOpen && user && (
+            <div className="border-t border-indigo-700 p-4">
+              <div className="flex items-center space-x-3 mb-3">
+                <div className="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center">
+                  <User className="w-4 h-4" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium">{user.nome}</p>
+                  <p className="text-xs text-indigo-200">{user.role}</p>
+                </div>
+              </div>
+              <button
+                onClick={logout}
+                className="w-full flex items-center px-3 py-2 text-sm text-indigo-200 hover:text-white hover:bg-indigo-700 rounded-lg transition-colors"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Sair
+              </button>
+            </div>
+          )}
         </div>
 
         <button
@@ -105,6 +128,27 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               );
             })}
           </nav>
+
+          {user && (
+            <div className="border-t border-indigo-700 p-4">
+              <div className="flex items-center space-x-3 mb-3">
+                <div className="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center">
+                  <User className="w-4 h-4" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium">{user.nome}</p>
+                  <p className="text-xs text-indigo-200">{user.role}</p>
+                </div>
+              </div>
+              <button
+                onClick={logout}
+                className="w-full flex items-center px-3 py-2 text-sm text-indigo-200 hover:text-white hover:bg-indigo-700 rounded-lg transition-colors"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Sair
+              </button>
+            </div>
+          )}
         </div>
       </aside>
 
@@ -122,8 +166,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <h1 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
                   Sistema de Chamados B2B
                 </h1>
-                <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                  Controle e gerenciamento de chamados técnicos
+                <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-500'}`}>
+                  {user ? `Bem-vindo, ${user.nome}` : 'Carregando...'}
                 </p>
               </div>
             </div>
@@ -131,53 +175,34 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <div className="flex items-center space-x-4">
               <button
                 onClick={toggleDarkMode}
-                className={`p-2 rounded-lg transition-colors ${
-                  darkMode ? 'bg-gray-700 text-yellow-400 hover:bg-gray-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
+                className={`p-2 rounded-lg ${darkMode ? 'hover:bg-gray-700 text-gray-200' : 'hover:bg-gray-100 text-gray-600'} transition-colors`}
               >
                 {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
 
-              <div className="flex items-center">
-                <div className="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm font-medium">U</span>
-                </div>
-                <div className="ml-3 hidden sm:block">
-                  <div className={`text-sm font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                    Usuário Admin
+              {user && (
+                <div className="flex items-center space-x-3">
+                  <div className={`text-right ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                    <p className="text-sm font-medium">{user.nome}</p>
+                    <p className="text-xs">{user.operador}</p>
                   </div>
+                  <button
+                    onClick={logout}
+                    className={`p-2 rounded-lg ${darkMode ? 'hover:bg-gray-700 text-gray-200' : 'hover:bg-gray-100 text-gray-600'} transition-colors`}
+                    title="Sair"
+                  >
+                    <LogOut className="w-5 h-5" />
+                  </button>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </header>
 
-        <main className={`p-6 min-h-screen ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+        <main className="p-6">
           {children}
         </main>
       </div>
-
-      <nav className="fixed bottom-0 left-0 right-0 bg-indigo-600 text-white lg:hidden shadow-lg">
-        <div className="flex justify-around py-2">
-          {menuItems.slice(0, 5).map((item, index) => {
-            const Icon = item.icon;
-            return (
-              <a
-                key={index}
-                href={item.href}
-                className={`flex flex-col items-center p-2 text-xs transition-colors ${
-                  item.active ? 'text-green-400' : 'text-indigo-100 hover:text-white'
-                }`}
-              >
-                <Icon className="w-5 h-5 mb-1" />
-                <span className="truncate max-w-[60px]">{item.label.split(' ')[0]}</span>
-              </a>
-            );
-          })}
-        </div>
-      </nav>
-
-      <div className="h-16 lg:hidden"></div>
     </div>
   );
 };

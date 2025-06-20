@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://opb2b-backend-production.up.railway.app' 
-  : 'http://localhost:3001';
+  ? 'https://opb2b-backend-production.up.railway.app/api' 
+  : 'http://localhost:3001/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -81,13 +81,24 @@ export const apiService = {
   }
 };
 
+// Interceptor para adicionar token automaticamente
 api.interceptors.request.use(
   (config) => {
-    console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`);
+    // Pega o token do localStorage
+    const token = localStorage.getItem('auth_token') || localStorage.getItem('auth_session');
+    
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+      console.log(`🔑 Token adicionado à requisição: ${token.substring(0, 20)}...`);
+    } else {
+      console.log('⚠️ Nenhum token encontrado para adicionar à requisição');
+    }
+    
+    console.log(`📡 API Request: ${config.method?.toUpperCase()} ${config.url}`);
     return config;
   },
   (error) => {
-    console.error('Erro na requisição:', error);
+    console.error('❌ Erro na requisição:', error);
     return Promise.reject(error);
   }
 );
@@ -99,6 +110,16 @@ api.interceptors.response.use(
   },
   (error) => {
     console.error('Erro na resposta:', error);
+    
+    // COMENTADO: Não limpa localStorage automaticamente por erros 401
+    // if (error.response?.status === 401) {
+    //   localStorage.removeItem('auth_token');
+    //   localStorage.removeItem('auth_session');
+    //   localStorage.removeItem('auth_user');
+    //   window.location.href = '/login';
+    //   return;
+    // }
+    
     if (error.code === 'ECONNABORTED') {
       throw new Error('Timeout na conexão com o servidor');
     }
