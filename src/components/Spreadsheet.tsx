@@ -12,12 +12,12 @@ import { renderStatusBadge, renderCarteiraBadge } from '@/utils/badges';
 import {
   COLUMN_INDICES,
   DEFAULT_VISIBLE_COLUMNS,
-  INITIAL_FILTER_STATE,
   DATA_START_ROW,
   API_BASE_URL,
-  FIELD_MAPPING,
-  type FilterState
-} from '@/constants/spreadsheet';
+  FIELD_MAPPING
+} from '@/constants';
+import { FilterState } from '@/types';
+import { INITIAL_FILTER_STATE } from '@/config';
 
 interface PopupData {
   aberto: boolean;
@@ -42,7 +42,6 @@ const Spreadsheet: React.FC = () => {
   const [novoAndamento, setNovoAndamento] = useState('');
   const [formValues, setFormValues] = useState<any>({});
 
-  // Usar o tipo correto para filtros
   const [filtrosAvancados, setFiltrosAvancados] = useState<FilterState>({
     ...INITIAL_FILTER_STATE,
     status: [],
@@ -151,7 +150,12 @@ const Spreadsheet: React.FC = () => {
 
   const pegarChamado = async (dadosRow: any, actualRowIndex: number) => {
     try {
-      const agora = new Date().toLocaleString('pt-BR');
+      const agora = new Date();
+const dia = agora.getDate().toString().padStart(2, '0');
+const mes = (agora.getMonth() + 1).toString().padStart(2, '0');
+const hora = agora.getHours().toString().padStart(2, '0');
+const minutos = agora.getMinutes().toString().padStart(2, '0');
+const dataFormatada = `${dia}/${mes} ${hora}:${minutos}`;
       const colIndex = COLUMN_INDICES['RETORNO'];
 
       const response = await fetch(`${API_BASE_URL}/spreadsheet/update-cell`, {
@@ -160,7 +164,7 @@ const Spreadsheet: React.FC = () => {
         body: JSON.stringify({
           row: actualRowIndex,
           col: colIndex,
-          value: agora
+          value: dataFormatada
         })
       });
 
@@ -346,8 +350,8 @@ const Spreadsheet: React.FC = () => {
         handleCancelEdit={handleCancelEdit}
         abrirPopup={abrirPopup}
         pegarChamado={pegarChamado}
-        renderStatusBadge={renderStatusBadge}
-        renderCarteiraBadge={renderCarteiraBadge}
+        renderStatusBadge={(status) => renderStatusBadge(status, darkMode)}
+        renderCarteiraBadge={(carteira) => renderCarteiraBadge(carteira, darkMode)}
       />
 
       <Popup
@@ -360,8 +364,8 @@ const Spreadsheet: React.FC = () => {
         adicionarAndamento={adicionarAndamento}
         salvarAlteracoesPopup={salvarAlteracoesPopup}
         pegarChamado={pegarChamado}
-        renderStatusBadge={renderStatusBadge}
-        renderCarteiraBadge={renderCarteiraBadge}
+        renderStatusBadge={(status) => renderStatusBadge(status, darkMode)}
+        renderCarteiraBadge={(carteira) => renderCarteiraBadge(carteira, darkMode)}
       />
     </div>
   );

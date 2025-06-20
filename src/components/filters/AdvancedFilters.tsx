@@ -20,8 +20,9 @@ import {
   Bookmark,
   ChevronUp
 } from 'lucide-react';
-import { CARTEIRAS_LIST, STATUS_LIST, INITIAL_FILTER_STATE, OPERADOR_LIST } from '@/constants/spreadsheet';
-import { FilterState } from '@/types/filters';
+import { CARTEIRAS_LIST, STATUS_LIST, OPERADOR_LIST } from '@/constants';
+import { FilterState } from '@/types';
+import { INITIAL_FILTER_STATE } from '@/config';
 
 interface AdvancedFiltersProps {
   filtrosAvancados: FilterState;

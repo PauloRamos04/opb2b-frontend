@@ -1,29 +1,18 @@
-/** @type {import('tailwindcss').Config} */
+// tailwind.config.js
 module.exports = {
   content: [
-    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/**/*.{js,ts,jsx,tsx}', // ajuste de acordo com seu projeto
+  ],
+  safelist: [
+    {
+      pattern: /bg-(red|orange|yellow|green|teal|blue|indigo|purple|pink|emerald|gray|slate|cyan|amber|violet|sky|lime|rose|fuchsia|stone)-(400|500|600|700)/,
+    },
+    {
+      pattern: /text-(white|gray-900)/,
+    },
   ],
   theme: {
-    extend: {
-      colors: {
-        primary: {
-          DEFAULT: '#5a53f7',
-          50: '#f0f0ff',
-          100: '#e4e2ff',
-          200: '#ccc9ff',
-          300: '#a8a1ff',
-          400: '#7d71ff',
-          500: '#5a53f7',
-          600: '#4b3eec',
-          700: '#4032d8',
-          800: '#342bb0',
-          900: '#2e298a',
-        },
-        accent: '#00fa97',
-      },
-    },
+    extend: {},
   },
   plugins: [],
 }

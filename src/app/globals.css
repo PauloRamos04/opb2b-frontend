@@ -59,9 +59,14 @@ body {
   background-color: #f8fafc;
 }
 
-.bg-indigo-600 {
+.bg-indigo {
   background-color: #4f46e5;
 }
+
+.bg-yellow {
+  background-color:rgb(229, 200, 70);
+}
+
 
 .text-white {
   color: white;

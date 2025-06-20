@@ -8,7 +8,8 @@ import {
   Clock,
   PhoneCall
 } from 'lucide-react';
-import { TABLE_COLUMN_ORDER, COLUMN_INDICES } from '@/constants/spreadsheet';
+import { TABLE_COLUMN_ORDER, COLUMN_INDICES } from '@/constants';
+import { renderOperadorBadge } from '@/utils/badges';
 
 interface FilteredDataItem {
   data: string[];
@@ -93,7 +94,7 @@ const Table: React.FC<TableProps> = ({
                 ultimaEdicao: getCellValue(row, 'ÚLTIMA EDIÇÃO')
               };
 
-              const temRetorno = dadosRow.retorno && dadosRow.retorno.trim() !== '';
+              const temRetorno = dadosRow.operador.trim() !== 'S/C' && dadosRow.retorno.trim() !== '';
 
               return (
                 <tr key={actualRowIndex} className={`${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'} transition-colors`}>
@@ -147,14 +148,13 @@ const Table: React.FC<TableProps> = ({
                               <div className="inline-block">
                                 {renderCarteiraBadge(value)}
                               </div>
+                            ) : colName === 'OPERADOR' ? (
+                              <div className="inline-block">
+                                {renderOperadorBadge(value, darkMode)}
+                              </div>
                             ) : colName === 'RETORNO' && value ? (
                               <span className="text-green-600 font-medium flex items-center">
                                 <Clock className="w-3 h-3 mr-1" />
-                                {value}
-                              </span>
-                            ) : colName === 'OPERADOR' && value.toUpperCase() === 'LIVRE' ? (
-                              <span className="text-green-600 font-medium flex items-center">
-                                <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
                                 {value}
                               </span>
                             ) : (

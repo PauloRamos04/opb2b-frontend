@@ -6,8 +6,8 @@ import {
   AlertCircle,
   RefreshCw
 } from 'lucide-react';
-import AdvancedFilters from '@/components/AdvancedFilters';
-import { FilterState } from '@/constants/spreadsheet';
+import AdvancedFilters from '@/components/filters/AdvancedFilters';
+import { FilterState } from '@/types';
 
 interface HeaderProps {
   isConnected: boolean;
