@@ -49,11 +49,11 @@ const Spreadsheet: React.FC = () => {
     operador: [],
     tags: []
   });
-  
+
   const [colunasVisiveis, setColunasVisiveis] = useState<Record<string, boolean>>({
     ...DEFAULT_VISIBLE_COLUMNS
   });
-  
+
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
 
   const valoresUnicos = useMemo(() => {
@@ -151,11 +151,11 @@ const Spreadsheet: React.FC = () => {
   const pegarChamado = async (dadosRow: any, actualRowIndex: number) => {
     try {
       const agora = new Date();
-const dia = agora.getDate().toString().padStart(2, '0');
-const mes = (agora.getMonth() + 1).toString().padStart(2, '0');
-const hora = agora.getHours().toString().padStart(2, '0');
-const minutos = agora.getMinutes().toString().padStart(2, '0');
-const dataFormatada = `${dia}/${mes} ${hora}:${minutos}`;
+      const dia = agora.getDate().toString().padStart(2, '0');
+      const mes = (agora.getMonth() + 1).toString().padStart(2, '0');
+      const hora = agora.getHours().toString().padStart(2, '0');
+      const minutos = agora.getMinutes().toString().padStart(2, '0');
+      const dataFormatada = `${dia}/${mes} ${hora}:${minutos}`;
       const colIndex = COLUMN_INDICES['RETORNO'];
 
       const response = await fetch(`${API_BASE_URL}/spreadsheet/update-cell`, {
