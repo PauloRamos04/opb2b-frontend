@@ -63,18 +63,7 @@ function LoginForm() {
       setIsSubmitting(false);
     }
   };
-
-  const fillTestCredentials = (userType: 'admin' | 'operador') => {
-    if (userType === 'admin') {
-      setEmail('dione@b2b.com');
-      setPassword('123456');
-    } else {
-      setEmail('paulo@b2b.com');
-      setPassword('123456');
-    }
-    setErrors({});
-  };
-
+  
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-cyan-50">
