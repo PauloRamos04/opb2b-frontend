@@ -23,6 +23,11 @@ import {
 import { CARTEIRAS_LIST, STATUS_LIST, OPERADOR_LIST } from '@/constants';
 import { FilterState } from '@/types';
 import { INITIAL_FILTER_STATE } from '@/config';
+import StatusFilter from './AdvancedFilters/StatusFilter';
+import CarteiraFilter from './AdvancedFilters/CarteiraFilter';
+import OperadorFilter from './AdvancedFilters/OperadorFilter';
+import AdvancedFields from './AdvancedFilters/AdvancedFields';
+import ColunasVisiveis from './AdvancedFilters/ColunasVisiveis';
 
 interface AdvancedFiltersProps {
   filtrosAvancados: FilterState;
@@ -223,131 +228,27 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div>
-                    <label className={`block text-sm font-bold mb-3 ${darkMode ? 'text-gray-50' : 'text-gray-900'}`}>
-                      <Tag className="w-4 h-4 inline mr-2" />
-                      Status
-                    </label>
-                    <div className="space-y-2">
-                      <select
-                        onChange={(e) => {
-                          if (e.target.value) {
-                            adicionarFiltroStatus(e.target.value);
-                            e.target.value = '';
-                          }
-                        }}
-                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${darkMode
-                          ? 'bg-gray-700 border-gray-600 text-white'
-                          : 'bg-white border-gray-300 text-gray-900'
-                          }`}
-                      >
-                        <option value="">Adicionar status...</option>
-                        {STATUS_LIST.filter(s => !filtrosAvancados.status.includes(s)).map(status => (
-                          <option key={status} value={status}>{status}</option>
-                        ))}
-                      </select>
-                      <div className="flex flex-wrap gap-2">
-                        {filtrosAvancados.status.map(status => (
-                          <span
-                            key={status}
-                            className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800"
-                          >
-                            {status}
-                            <button
-                              onClick={() => removerFiltroStatus(status)}
-                              className="ml-1 hover:text-blue-600"
-                            >
-                              <X className="w-3 h-3" />
-                            </button>
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className={`block text-sm font-bold mb-3 ${darkMode ? 'text-gray-50' : 'text-gray-900'}`}>
-                      <Building className="w-4 h-4 inline mr-2" />
-                      Carteiras
-                    </label>
-                    <div className="space-y-2">
-                      <select
-                        onChange={(e) => {
-                          if (e.target.value) {
-                            adicionarFiltroCarteira(e.target.value);
-                            e.target.value = '';
-                          }
-                        }}
-                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${darkMode
-                          ? 'bg-gray-700 border-gray-600 text-white'
-                          : 'bg-white border-gray-300 text-gray-900'
-                          }`}
-                      >
-                        <option value="">Adicionar carteira...</option>
-                        {CARTEIRAS_LIST.filter(c => !filtrosAvancados.carteira.includes(c)).map(carteira => (
-                          <option key={carteira} value={carteira}>{carteira}</option>
-                        ))}
-                      </select>
-                      <div className="flex flex-wrap gap-2">
-                        {filtrosAvancados.carteira.map(carteira => (
-                          <span
-                            key={carteira}
-                            className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-800"
-                          >
-                            {carteira}
-                            <button
-                              onClick={() => removerFiltroCarteira(carteira)}
-                              className="ml-1 hover:text-green-600"
-                            >
-                              <X className="w-3 h-3" />
-                            </button>
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className={`block text-sm font-bold mb-3 ${darkMode ? 'text-gray-50' : 'text-gray-900'}`}>
-                      <User className="w-4 h-4 inline mr-2" />
-                      Operadores
-                    </label>
-                    <div className="space-y-2">
-                      <select
-                        onChange={(e) => {
-                          if (e.target.value) {
-                            adicionarFiltroOperador(e.target.value);
-                            e.target.value = '';
-                          }
-                        }}
-                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${darkMode
-                          ? 'bg-gray-700 border-gray-600 text-white'
-                          : 'bg-white border-gray-300 text-gray-900'
-                          }`}
-                      >
-                        <option value="">Adicionar Operador...</option>
-                        {OPERADOR_LIST.filter(c => !filtrosAvancados.operador.includes(c)).map(operador => (
-                          <option key={operador} value={operador}>{operador}</option>
-                        ))}
-                      </select>
-                      <div className="flex flex-wrap gap-2">
-                        {filtrosAvancados.operador.map(operador => (
-                          <span
-                            key={operador}
-                            className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-purple-100 text-purple-800"
-                          >
-                            {operador}
-                            <button
-                              onClick={() => removerFiltroOperador(operador)}
-                              className="ml-1 hover:text-purple-600"
-                            >
-                              <X className="w-3 h-3" />
-                            </button>
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
+                  <StatusFilter
+                    statusList={STATUS_LIST}
+                    selectedStatus={filtrosAvancados.status}
+                    adicionarFiltroStatus={adicionarFiltroStatus}
+                    removerFiltroStatus={removerFiltroStatus}
+                    darkMode={darkMode}
+                  />
+                  <CarteiraFilter
+                    carteiraList={CARTEIRAS_LIST}
+                    selectedCarteiras={filtrosAvancados.carteira}
+                    adicionarFiltroCarteira={adicionarFiltroCarteira}
+                    removerFiltroCarteira={removerFiltroCarteira}
+                    darkMode={darkMode}
+                  />
+                  <OperadorFilter
+                    operadorList={OPERADOR_LIST}
+                    selectedOperadores={filtrosAvancados.operador}
+                    adicionarFiltroOperador={adicionarFiltroOperador}
+                    removerFiltroOperador={removerFiltroOperador}
+                    darkMode={darkMode}
+                  />
                 </div>
 
                 <div className="flex justify-between items-center border-t pt-4">
@@ -397,160 +298,23 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
                 </div>
 
                 {showAdvanced && (
-                  <div className={`mt-4 p-4 rounded-lg space-y-4 ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                      <div>
-                        <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-50' : 'text-gray-700'}`}>
-                          <User className="w-4 h-4 inline mr-2" />
-                          Técnico
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="Filtrar por técnico..."
-                          value={filtrosAvancados.tecnico}
-                          onChange={(e) => setFiltrosAvancados(prev => ({ ...prev, tecnico: e.target.value }))}
-                          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${darkMode
-                            ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-400'
-                            : 'bg-white border-gray-300 text-gray-900'
-                            }`}
-                        />
-                      </div>
-
-                      <div>
-                        <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-50' : 'text-gray-700'}`}>
-                          <Building className="w-4 h-4 inline mr-2" />
-                          Cliente
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="Nome do cliente..."
-                          value={filtrosAvancados.cliente}
-                          onChange={(e) => setFiltrosAvancados(prev => ({ ...prev, cliente: e.target.value }))}
-                          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${darkMode
-                            ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-400'
-                            : 'bg-white border-gray-300 text-gray-900'
-                            }`}
-                        />
-                      </div>
-
-                      <div>
-                        <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-50' : 'text-gray-700'}`}>
-                          Cidade
-                        </label>
-                        <select
-                          value={filtrosAvancados.cidade}
-                          onChange={(e) => setFiltrosAvancados(prev => ({ ...prev, cidade: e.target.value }))}
-                          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${darkMode
-                            ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-400'
-                            : 'bg-white border-gray-300 text-gray-900'
-                            }`}
-                        >
-                          <option value="">Todas as cidades</option>
-                          {valoresUnicos.cidades?.map(cidades => (
-                            <option key={cidades} value={cidades}>{cidades}</option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-50' : 'text-gray-700'}`}>
-                          <Clock className="w-4 h-4 inline mr-2" />
-                          Tem Retorno
-                        </label>
-                        <select
-                          value={filtrosAvancados.temRetorno}
-                          onChange={(e) => setFiltrosAvancados(prev => ({ ...prev, temRetorno: e.target.value }))}
-                          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${darkMode
-                            ? 'bg-gray-800 border-gray-700 text-white'
-                            : 'bg-white border-gray-300 text-gray-900'
-                            }`}
-                        >
-                          <option value="">Todos</option>
-                          <option value="sim">Com retorno</option>
-                          <option value="nao">Sem retorno</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-50' : 'text-gray-700'}`}>
-                          <Calendar className="w-4 h-4 inline mr-2" />
-                          Data Início
-                        </label>
-                        <input
-                          type="date"
-                          value={filtrosAvancados.dataInicio}
-                          onChange={(e) => setFiltrosAvancados(prev => ({ ...prev, dataInicio: e.target.value }))}
-                          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${darkMode
-                            ? 'bg-gray-800 border-gray-700 text-white'
-                            : 'bg-white border-gray-300 text-gray-900'
-                            }`}
-                        />
-                      </div>
-
-                      <div>
-                        <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-50' : 'text-gray-700'}`}>
-                          <Calendar className="w-4 h-4 inline mr-2" />
-                          Data Fim
-                        </label>
-                        <input
-                          type="date"
-                          value={filtrosAvancados.dataFim}
-                          onChange={(e) => setFiltrosAvancados(prev => ({ ...prev, dataFim: e.target.value }))}
-                          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${darkMode
-                            ? 'bg-gray-800 border-gray-700 text-white'
-                            : 'bg-white border-gray-300 text-gray-900'
-                            }`}
-                        />
-                      </div>
-                    </div>
-                  </div>
+                  <AdvancedFields
+                    filtrosAvancados={filtrosAvancados}
+                    setFiltrosAvancados={setFiltrosAvancados}
+                    valoresUnicos={valoresUnicos}
+                    darkMode={darkMode}
+                  />
                 )}
               </div>
             )}
 
             {activeTab === 'colunas' && (
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <h4 className={`text-lg font-medium ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>
-                    Configurar Colunas Visíveis
-                  </h4>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => toggleAllColumns(true)}
-                      className="text-sm px-3 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200"
-                    >
-                      Mostrar Todas
-                    </button>
-                    <button
-                      onClick={() => toggleAllColumns(false)}
-                      className="text-sm px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
-                    >
-                      Ocultar Todas
-                    </button>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                  {Object.entries(colunasVisiveis).map(([coluna, visivel]) => (
-                    <label key={coluna} className={`flex items-center space-x-3 cursor-pointer p-2 rounded transition-colors ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}`}>
-                      <input
-                        type="checkbox"
-                        checked={visivel}
-                        onChange={(e) => setColunasVisiveis(prev => ({ ...prev, [coluna]: e.target.checked }))}
-                        className={`rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 ${darkMode ? 'bg-gray-700 border-gray-600' : ''}`}
-                      />
-                      <span className={`text-sm flex-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{coluna}</span>
-                      {visivel ? (
-                        <Eye className="w-4 h-4 text-green-500" />
-                      ) : (
-                        <EyeOff className="w-4 h-4 text-gray-400" />
-                      )}
-                    </label>
-                  ))}
-                </div>
-              </div>
+              <ColunasVisiveis
+                colunasVisiveis={colunasVisiveis}
+                setColunasVisiveis={setColunasVisiveis}
+                toggleAllColumns={toggleAllColumns}
+                darkMode={darkMode}
+              />
             )}
           </div>
         </div>

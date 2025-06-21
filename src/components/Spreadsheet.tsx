@@ -18,6 +18,10 @@ import {
 } from '@/constants';
 import { FilterState } from '@/types';
 import { INITIAL_FILTER_STATE } from '@/config';
+import SpreadsheetLoading from './Spreadsheet/SpreadsheetLoading';
+import SpreadsheetError from './Spreadsheet/SpreadsheetError';
+import SpreadsheetToolbar from './Spreadsheet/SpreadsheetToolbar';
+import SpreadsheetTable from './Spreadsheet/SpreadsheetTable';
 
 interface PopupData {
   aberto: boolean;
@@ -320,34 +324,16 @@ const Spreadsheet: React.FC = () => {
   };
 
   if (loading) {
-    return (
-      <div className={`flex items-center justify-center h-64 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-        <RefreshCw className="w-8 h-8 animate-spin text-blue-500" />
-        <span className="ml-2">Carregando dados...</span>
-      </div>
-    );
+    return <SpreadsheetLoading darkMode={darkMode} />;
   }
 
   if (error) {
-    return (
-      <div className={`${darkMode ? 'bg-red-900/20 border-red-800' : 'bg-red-50 border-red-200'} border rounded-lg p-4`}>
-        <div className="flex items-center">
-          <X className="w-5 h-5 text-red-500 mr-2" />
-          <span className={darkMode ? 'text-red-300' : 'text-red-700'}>Erro: {error}</span>
-        </div>
-        <button
-          onClick={refreshData}
-          className="mt-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-        >
-          Tentar novamente
-        </button>
-      </div>
-    );
+    return <SpreadsheetError error={error} darkMode={darkMode} refreshData={refreshData} />;
   }
 
   return (
     <div className="w-full space-y-6">
-      <Header
+      <SpreadsheetToolbar
         isConnected={isConnected}
         filtrosAvancados={filtrosAvancados}
         setFiltrosAvancados={setFiltrosAvancados}
@@ -360,7 +346,7 @@ const Spreadsheet: React.FC = () => {
         refreshData={refreshData}
       />
 
-      <Table
+      <SpreadsheetTable
         filteredData={filteredData}
         colunasVisiveis={colunasVisiveis}
         editingCell={editingCell}
