@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { TABLE_COLUMN_ORDER, COLUMN_INDICES } from '@/constants';
 import { renderOperadorBadge } from '@/utils/badges';
+import TimeAgo from '../TimeAgo';
 
 interface FilteredDataItem {
   data: string[];
@@ -136,9 +137,17 @@ const Table: React.FC<TableProps> = ({
                     .map((colName) => {
                       const value = getCellValue(row, colName);
 
+                      if (colName === 'OPERADOR' && value === 'LIVRE') {
+                        const dataAbertura = getCellValue(row, 'DATA ABERTURA');
+                        return (
+                          <td key={colName} className={`px-4 py-4 whitespace-nowrap text-sm border-b ${darkMode ? 'text-white border-gray-700' : 'text-gray-600 border-gray-300'}`}>
+                            <TimeAgo dateString={dataAbertura} />
+                          </td>
+                        );
+                      }
+
                       return (
-                        <td key={colName} className={`px-4 py-4 whitespace-nowrap text-sm border-b ${darkMode ? 'text-white border-gray-700' : 'text-gray-600 border-gray-300'
-                          }`}>
+                        <td key={colName} className={`px-4 py-4 whitespace-nowrap text-sm border-b ${darkMode ? 'text-white border-gray-700' : 'text-gray-600 border-gray-300'}`}>
                           <div className="max-w-xs">
                             {colName === 'STATUS' ? (
                               <div className="inline-block">

@@ -7,7 +7,7 @@ import Header from '@/components/Header';
 import Table from '@/components/Table';
 import Popup from '@/components/Popup';
 import { RefreshCw, X } from 'lucide-react';
-import { getUniqueValues, filterData } from '@/utils/functions';
+import { getUniqueValues, filterData, parseDate } from '@/utils/functions';
 import { renderStatusBadge, renderCarteiraBadge } from '@/utils/badges';
 import {
   COLUMN_INDICES,
@@ -119,11 +119,13 @@ const Spreadsheet: React.FC = () => {
       const originalIndex = dataRows.findIndex(dataRow => dataRow === rowData);
       return {
         data: rowData,
-        originalIndex: originalIndex + DATA_START_ROW + 1
+        originalIndex: originalIndex + DATA_START_ROW
       };
-    });
+    })
+    .sort((a, b) => b.originalIndex - a.originalIndex);
 
     setFilteredData(filteredWithOriginalIndex);
+    console.log('Filtros aplicados, dados filtrados:', filteredWithOriginalIndex.length);
   };
 
   const handleCellEdit = (row: number, col: number, value: string) => {

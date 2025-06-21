@@ -28,26 +28,30 @@ export const extractValoresUnicos = (data: string[][]): ValoresUnicos => {
   };
 };
 
-const parseDate = (dateStr: string): Date => {
-  if (!dateStr) return new Date(0);
-  
-  const formats = [
-    /(\d{1,2})\/(\d{1,2})\/(\d{4})/,
-    /(\d{4})-(\d{1,2})-(\d{1,2})/
-  ];
-  
-  for (const format of formats) {
-    const match = dateStr.match(format);
-    if (match) {
-      if (format === formats[0]) {
-        return new Date(parseInt(match[3]), parseInt(match[2]) - 1, parseInt(match[1]));
-      } else {
-        return new Date(parseInt(match[1]), parseInt(match[2]) - 1, parseInt(match[3]));
-      }
-    }
+// Função para parsear datas nos formatos 'DD/MM/YYYY HH:mm:ss' ou 'DD/MM/YYYY'
+export const parseDate = (dateStr: string): Date | null => {
+  if (!dateStr) return null;
+
+  // Tenta o formato 'DD/MM/YYYY HH:mm:ss'
+  let parts = dateStr.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})(?: (\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?/);
+  if (parts) {
+    const day = parseInt(parts[1], 10);
+    const month = parseInt(parts[2], 10) - 1; // Mês é 0-indexado
+    const year = parseInt(parts[3], 10);
+    const hour = parts[4] ? parseInt(parts[4], 10) : 0;
+    const minute = parts[5] ? parseInt(parts[5], 10) : 0;
+    const second = parts[6] ? parseInt(parts[6], 10) : 0;
+
+    return new Date(year, month, day, hour, minute, second);
   }
-  
-  return new Date(dateStr);
+
+  // Tenta o formato ISO (YYYY-MM-DDTHH:mm:ss.sssZ) ou similar
+  const date = new Date(dateStr);
+  if (!isNaN(date.getTime())) {
+    return date;
+  }
+
+  return null;
 };
 
 export const filterData = (
@@ -168,4 +172,31 @@ export const filterData = (
 
   console.log('✅ Dados filtrados:', filteredData.length, 'linhas');
   return filteredData;
+};
+
+export const filterDataDetailed = (
+  originalData: string[][],
+  filteredData: FilteredDataItem[],
+  columnIndices: Record<string, number>
+): FilteredDataItem[] => {
+  console.log('🔍 Aplicando busca detalhada:', filteredData.length, 'itens');
+  console.log('📊 Dados recebidos:', originalData.length, 'linhas');
+  
+  if (originalData.length === 0) {
+    console.log('❌ Nenhum dado para buscar');
+    return [];
+  }
+  
+  return filteredData.reduce((acc, item) => {
+    const dataRow = originalData.find(row => row[columnIndices.Histórico] === item.data[columnIndices.Histórico]);
+    
+    if (dataRow) {
+      acc.push({
+        ...item,
+        data: dataRow,
+      });
+    }
+
+    return acc;
+  }, [] as FilteredDataItem[]);
 };
