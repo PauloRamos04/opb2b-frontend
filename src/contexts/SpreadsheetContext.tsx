@@ -4,6 +4,8 @@ import React, { createContext, useContext, useState, useEffect, ReactNode, useCa
 import { apiService } from '../services/api.service';
 import { useAuth } from './AuthContext';
 import { toast } from 'react-hot-toast';
+import { useSocket } from '@/hooks/useSocket';
+import { API_BASE_URL } from '@/constants';
 
 export interface NovoChamadoData {
   empresa: string;
@@ -49,6 +51,7 @@ export const SpreadsheetProvider: React.FC<SpreadsheetProviderProps> = ({ childr
   const [filters, setFilters] = useState({});
   
   const { isAuthenticated, user } = useAuth();
+  const { on, off } = useSocket(API_BASE_URL);
 
   const loadData = useCallback(async () => {
     if (!isAuthenticated) {
@@ -159,6 +162,24 @@ export const SpreadsheetProvider: React.FC<SpreadsheetProviderProps> = ({ childr
       throw err;
     }
   }, [isAuthenticated, user, refreshData]);
+
+  useEffect(() => {
+    const handleDataUpdate = () => {
+      console.log('Recebido evento de atualização do backend via socket!');
+      toast.success('A planilha foi atualizada!', { duration: 2000 });
+      refreshData();
+    };
+
+    on('data-update', handleDataUpdate);
+
+    return () => {
+      off('data-update', handleDataUpdate);
+    };
+  }, [on, off, refreshData]);
+
+  useEffect(() => {
+    refreshData();
+  }, [refreshData]);
 
   return (
     <SpreadsheetContext.Provider

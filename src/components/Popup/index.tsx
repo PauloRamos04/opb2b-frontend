@@ -14,11 +14,11 @@ import {
 } from 'lucide-react';
 import { STATUS_LIST, CARTEIRAS_LIST } from '@/constants';
 import { renderOperadorBadge } from '@/utils/badges';
-import PopupHeader from './Popup/PopupHeader';
-import PopupDetalhesForm from './Popup/PopupDetalhesForm';
-import PopupAndamentos from './Popup/PopupAndamentos';
-import PopupNovoForm from './Popup/PopupNovoForm';
-import PopupFooter from './Popup/PopupFooter';
+import PopupHeader from './PopupHeader';
+import PopupDetalhesForm from './PopupDetalhesForm';
+import PopupAndamentos from './PopupAndamentos';
+import PopupNovoForm from './PopupNovoForm';
+import PopupFooter from './PopupFooter';
 
 interface PopupProps {
   popup: {

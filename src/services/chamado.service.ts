@@ -1,3 +1,6 @@
+import { apiService, UpdateCellRequest } from './api.service';
+import { COLUMN_INDICES } from '@/constants';
+
 export interface PegarChamadoRequest {
   linha: number;
   operador: string;
@@ -49,32 +52,46 @@ class ChamadoService {
 
   async pegarChamado(data: PegarChamadoRequest): Promise<ChamadoResponse> {
     try {
-      const response = await fetch(`${this.baseUrl}/chamados/pegar`, {
-        method: 'POST',
-        headers: this.getHeaders(),
-        credentials: 'include',
-        body: JSON.stringify(data),
-      });
+      const agora = new Date();
+      const dia = agora.getDate().toString().padStart(2, '0');
+      const mes = (agora.getMonth() + 1).toString().padStart(2, '0');
+      const hora = agora.getHours().toString().padStart(2, '0');
+      const minutos = agora.getMinutes().toString().padStart(2, '0');
+      const dataFormatada = `${dia}/${mes} ${hora}:${minutos}`;
 
-      const result = await response.json();
-      return result;
+      const updateRetorno: UpdateCellRequest = { row: data.linha, col: COLUMN_INDICES['RETORNO'], value: dataFormatada };
+      const updateOperador: UpdateCellRequest = { row: data.linha, col: COLUMN_INDICES['OPERADOR'], value: data.operador };
+
+      const [resRetorno, resOperador] = await Promise.all([
+        apiService.updateCell(updateRetorno),
+        apiService.updateCell(updateOperador)
+      ]);
+
+      if (!resRetorno.success || !resOperador.success) {
+        throw new Error('Erro ao atualizar células de retorno ou operador');
+      }
+      return { success: true, message: "Chamado pego com sucesso!" };
     } catch (error) {
       console.error('Erro ao pegar chamado:', error);
       throw new Error('Falha ao pegar chamado');
     }
   }
 
-  async adicionarAndamento(data: AdicionarAndamentoRequest): Promise<ChamadoResponse> {
+  async adicionarAndamento(data: AdicionarAndamentoRequest & { valorAtual: string }): Promise<ChamadoResponse> {
     try {
-      const response = await fetch(`${this.baseUrl}/chamados/andamento`, {
-        method: 'POST',
-        headers: this.getHeaders(),
-        credentials: 'include',
-        body: JSON.stringify(data),
-      });
+      const timestamp = new Date().toLocaleString('pt-BR');
+      const novoAndamentoCompleto = `${timestamp} - ${data.operador}: ${data.andamento}`;
+      const novoValor = data.valorAtual
+        ? `${data.valorAtual}\n${novoAndamentoCompleto}`
+        : novoAndamentoCompleto;
 
-      const result = await response.json();
-      return result;
+      const update: UpdateCellRequest = { row: data.linha, col: COLUMN_INDICES['DESCRIÇÃO'], value: novoValor };
+      const result = await apiService.updateCell(update);
+
+      if (!result.success) {
+        throw new Error(result.message || 'Erro ao adicionar andamento');
+      }
+      return { success: true, message: "Andamento adicionado", data: { novoValor } };
     } catch (error) {
       console.error('Erro ao adicionar andamento:', error);
       throw new Error('Falha ao adicionar andamento');
@@ -193,6 +210,16 @@ class ChamadoService {
     } catch (error) {
       console.error('Erro ao verificar status dos chamados:', error);
       throw new Error('Falha ao verificar status dos chamados');
+    }
+  }
+
+  async salvarAlteracoes(updates: UpdateCellRequest[]): Promise<void> {
+    for (const update of updates) {
+      const result = await apiService.updateCell(update);
+      if (!result.success) {
+        throw new Error(result.message || 'Erro ao atualizar célula');
+      }
+      await new Promise(resolve => setTimeout(resolve, 200));
     }
   }
 }

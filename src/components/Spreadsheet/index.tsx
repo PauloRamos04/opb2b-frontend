@@ -18,10 +18,10 @@ import {
 } from '@/constants';
 import { FilterState } from '@/types';
 import { INITIAL_FILTER_STATE } from '@/config';
-import SpreadsheetLoading from './Spreadsheet/SpreadsheetLoading';
-import SpreadsheetError from './Spreadsheet/SpreadsheetError';
-import SpreadsheetToolbar from './Spreadsheet/SpreadsheetToolbar';
-import SpreadsheetTable from './Spreadsheet/SpreadsheetTable';
+import SpreadsheetLoading from './SpreadsheetLoading';
+import SpreadsheetError from './SpreadsheetError';
+import SpreadsheetToolbar from './SpreadsheetToolbar';
+import SpreadsheetTable from './SpreadsheetTable';
 import { usePopup } from '@/hooks/usePopup';
 import { useChamadoActions } from '@/hooks/useChamadoActions';
 
