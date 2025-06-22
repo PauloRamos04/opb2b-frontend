@@ -64,10 +64,8 @@ const TimeAgo: React.FC<TimeAgoProps> = ({ dateString, modoDias }) => {
         // Texto
         if (diffInDays < 1) {
           setTimeAgo('hoje');
-        } else if (diffInDays < 3) {
-          setTimeAgo(`${diffInDays}d`);
         } else {
-          setTimeAgo('3d+');
+          setTimeAgo(`${diffInDays}d`);
         }
         return;
       }
