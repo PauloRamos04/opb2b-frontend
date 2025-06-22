@@ -215,6 +215,7 @@ const Spreadsheet: React.FC = () => {
         pegarChamado={pegarChamado}
         renderStatusBadge={(status) => renderStatusBadge(status, darkMode)}
         renderCarteiraBadge={(carteira) => renderCarteiraBadge(carteira, darkMode)}
+        tecnicos={valoresUnicos.tecnicos}
       />
     </div>
   );

@@ -16,7 +16,7 @@ import { STATUS_LIST, CARTEIRAS_LIST } from '@/constants';
 import { renderOperadorBadge } from '@/utils/badges';
 import PopupHeader from './PopupHeader';
 import PopupDetalhesForm from './PopupDetalhesForm';
-import PopupAndamentos from './PopupAndamentos';
+// import PopupAndamentos from './PopupAndamentos'; // REMOVIDO
 import PopupNovoForm from './PopupNovoForm';
 import PopupFooter from './PopupFooter';
 
@@ -86,13 +86,14 @@ const Popup: React.FC<PopupProps> = ({
                 renderCarteiraBadge={renderCarteiraBadge}
                 darkMode={darkMode}
               />
-              <PopupAndamentos
+              {/* O COMPONENTE ABAIXO FOI REMOVIDO */}
+              {/* <PopupAndamentos
                 descricao={popup.dados?.descricao || ''}
                 novoAndamento={novoAndamento}
                 setNovoAndamento={setNovoAndamento}
                 adicionarAndamento={adicionarAndamento}
                 darkMode={darkMode}
-              />
+              /> */}
             </>
           )}
           {popup.tipo === 'novo' && (

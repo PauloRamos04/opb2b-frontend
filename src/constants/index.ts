@@ -155,6 +155,11 @@ export const FIELD_MAPPING = {
   'cliente': 'CLIENTE', 'assuntos': 'ASSUNTO', 'descricao': 'DESCRIÇÃO'
 };
 
+export const TECNICO_LIST = [
+  'FTTH', 'RADIO','PACPON', 'HFC'
+]
+
+
 export type StatusType = typeof STATUS_LIST[number];
 export type CarteiraType = typeof CARTEIRAS_LIST[number];
 export type OperadorType = typeof OPERADOR_LIST[number];
