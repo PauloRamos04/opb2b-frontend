@@ -110,9 +110,15 @@ export const SpreadsheetProvider: React.FC<SpreadsheetProviderProps> = ({ childr
       checkConnection();
       loadData();
       const interval = setInterval(checkConnection, 30000);
-      return () => clearInterval(interval);
+      const polling = setInterval(() => {
+        refreshData();
+      }, 30000);
+      return () => {
+        clearInterval(interval);
+        clearInterval(polling);
+      };
     }
-  }, [isAuthenticated, checkConnection, loadData]);
+  }, [isAuthenticated, checkConnection, loadData, refreshData]);
 
   const updateCell = useCallback(async (row: number, col: number, value: string) => {
     if (!isAuthenticated || !user) {
