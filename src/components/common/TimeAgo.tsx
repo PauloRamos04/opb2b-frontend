@@ -6,14 +6,32 @@ import { parseDate } from '@/utils/functions';
 
 interface TimeAgoProps {
   dateString: string;
+  modoDias?: boolean;
 }
 
-const TimeAgo: React.FC<TimeAgoProps> = ({ dateString }) => {
+const TimeAgo: React.FC<TimeAgoProps> = ({ dateString, modoDias }) => {
   const [timeAgo, setTimeAgo] = useState('');
   const [colorClass, setColorClass] = useState('text-green-500');
 
   useEffect(() => {
-    const parsedDate = parseDate(dateString);
+    // Função flexível para parsear datas
+    function parseDateFlex(dateStr: string): Date | null {
+      if (!dateStr) return null;
+      // Tenta DD/MM HH:mm
+      const match = dateStr.match(/(\d{1,2})\/(\d{1,2}) (\d{1,2}):(\d{1,2})/);
+      if (match) {
+        const day = parseInt(match[1], 10);
+        const month = parseInt(match[2], 10) - 1;
+        const hour = parseInt(match[3], 10);
+        const minute = parseInt(match[4], 10);
+        const year = new Date().getFullYear();
+        return new Date(year, month, day, hour, minute, 0);
+      }
+      // fallback para parseDate padrão
+      return parseDate(dateStr);
+    }
+
+    const parsedDate = parseDateFlex(dateString);
     if (!parsedDate) {
       setTimeAgo('Data inválida');
       setColorClass('text-gray-400');
@@ -23,13 +41,38 @@ const TimeAgo: React.FC<TimeAgoProps> = ({ dateString }) => {
     const updateTimer = () => {
       const now = new Date();
       const diffInMinutes = Math.floor((now.getTime() - parsedDate.getTime()) / (1000 * 60));
+      const diffInHours = Math.floor(diffInMinutes / 60);
+      const diffInDays = Math.floor(diffInHours / 24);
 
       if (diffInMinutes < 0) {
         setTimeAgo('No futuro');
         setColorClass('text-blue-400');
         return;
       }
-      
+
+      if (modoDias) {
+        // Lógica de cor baseada em dias
+        if (diffInDays < 1) {
+          setColorClass('text-green-500');
+        } else if (diffInDays < 2) {
+          setColorClass('text-yellow-500 font-semibold');
+        } else if (diffInDays < 3) {
+          setColorClass('text-red-500 font-bold animate-pulse');
+        } else {
+          setColorClass('text-red-500 font-bold animate-pulse');
+        }
+        // Texto
+        if (diffInDays < 1) {
+          setTimeAgo('hoje');
+        } else if (diffInDays < 3) {
+          setTimeAgo(`${diffInDays}d`);
+        } else {
+          setTimeAgo('3d+');
+        }
+        return;
+      }
+
+      // Lógica padrão (minutos/horas)
       // Lógica de cores
       if (diffInMinutes > 30) {
         setColorClass('text-red-500 font-bold animate-pulse');
@@ -38,18 +81,15 @@ const TimeAgo: React.FC<TimeAgoProps> = ({ dateString }) => {
       } else {
         setColorClass('text-green-500');
       }
-      
       // Lógica de texto
       if (diffInMinutes < 1) {
         setTimeAgo('agora');
       } else if (diffInMinutes < 60) {
         setTimeAgo(`${diffInMinutes}m`);
       } else {
-        const diffInHours = Math.floor(diffInMinutes / 60);
         if (diffInHours < 24) {
           setTimeAgo(`${diffInHours}h`);
         } else {
-          const diffInDays = Math.floor(diffInHours / 24);
           setTimeAgo(`${diffInDays}d`);
         }
       }
@@ -59,7 +99,7 @@ const TimeAgo: React.FC<TimeAgoProps> = ({ dateString }) => {
     const intervalId = setInterval(updateTimer, 30000); // Atualiza a cada 30 segundos
 
     return () => clearInterval(intervalId); // Limpa o intervalo
-  }, [dateString]);
+  }, [dateString, modoDias]);
 
   return (
     <span className={`flex items-center space-x-1 text-sm ${colorClass}`}>

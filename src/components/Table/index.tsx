@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { TABLE_COLUMN_ORDER, COLUMN_INDICES } from '@/constants';
 import { renderOperadorBadge } from '@/utils/badges';
-import TimeAgo from '../TimeAgo';
+import TimeAgo from '../common/TimeAgo';
 
 interface FilteredDataItem {
   data: string[];
@@ -137,11 +137,27 @@ const Table: React.FC<TableProps> = ({
                     .map((colName) => {
                       const value = getCellValue(row, colName);
 
-                      if (colName === 'OPERADOR' && value === 'LIVRE') {
+                      if (colName === 'OPERADOR') {
                         const dataAbertura = getCellValue(row, 'DATA ABERTURA');
+                        const ultimaEdicao = getCellValue(row, 'ÚLTIMA EDIÇÃO');
+                        const retorno = getCellValue(row, 'RETORNO');
                         return (
                           <td key={colName} className={`px-4 py-4 whitespace-nowrap text-sm border-b ${darkMode ? 'text-white border-gray-700' : 'text-gray-600 border-gray-300'}`}>
-                            <TimeAgo dateString={dataAbertura} />
+                            <div className="flex items-center gap-2">
+                              <span>{value}</span>
+                              {value === 'LIVRE' && dataAbertura && dataAbertura.trim() !== '' && (
+                                <TimeAgo dateString={dataAbertura} />
+                              )}
+                              {value === 'S/C' && (
+                                (ultimaEdicao && ultimaEdicao.trim() !== '' ?
+                                  <TimeAgo dateString={ultimaEdicao} /> :
+                                  (retorno && retorno.trim() !== '' && <TimeAgo dateString={retorno} />)
+                                )
+                              )}
+                              {value !== 'LIVRE' && value !== 'S/C' && dataAbertura && dataAbertura.trim() !== '' && (
+                                <TimeAgo dateString={dataAbertura} modoDias />
+                              )}
+                            </div>
                           </td>
                         );
                       }

@@ -132,7 +132,7 @@ const Spreadsheet: React.FC = () => {
       return parseDate(dateStr);
     }
 
-    // Ordenação: OPERADOR = 'LIVRE' primeiro, mais recentes no topo
+    // Ordenação: OPERADOR = 'LIVRE'/'S/C' primeiro, mais recentes no topo
     const sorted = filtered.sort((a, b) => {
       const operadorA = a[COLUMN_INDICES.OPERADOR] || '';
       const operadorB = b[COLUMN_INDICES.OPERADOR] || '';
@@ -142,6 +142,10 @@ const Spreadsheet: React.FC = () => {
       // Prioriza chamados com OPERADOR 'LIVRE'
       if (operadorA === 'LIVRE' && operadorB !== 'LIVRE') return -1;
       if (operadorA !== 'LIVRE' && operadorB === 'LIVRE') return 1;
+
+      // Depois prioriza chamados com OPERADOR 'S/C'
+      if (operadorA === 'S/C' && operadorB !== 'S/C') return -1;
+      if (operadorA !== 'S/C' && operadorB === 'S/C') return 1;
 
       // Dentro do mesmo grupo, ordena por data de abertura (mais recente primeiro)
       if (dataA && dataB) {

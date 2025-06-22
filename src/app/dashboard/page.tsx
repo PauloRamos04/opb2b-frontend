@@ -7,7 +7,7 @@ import { SpreadsheetProvider } from '@/contexts/SpreadsheetContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import ErrorBoundary from '@/components/ErrorBoundary';
+import ErrorBoundary from '@/components/common/ErrorBoundary';
 
 export default function DashboardPage() {
   return (
