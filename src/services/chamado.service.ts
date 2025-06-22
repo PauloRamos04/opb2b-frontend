@@ -213,13 +213,20 @@ class ChamadoService {
     }
   }
 
-  async salvarAlteracoes(updates: UpdateCellRequest[]): Promise<void> {
-    for (const update of updates) {
-      const result = await apiService.updateCell(update);
-      if (!result.success) {
-        throw new Error(result.message || 'Erro ao atualizar célula');
+  async salvarAlteracoes(updates: UpdateCellRequest[]): Promise<ChamadoResponse> {
+    try {
+      for (const update of updates) {
+        const result = await apiService.updateCell(update);
+        if (!result.success) {
+          throw new Error(result.message || `Erro ao atualizar a célula na coluna ${update.col}`);
+        }
+        await new Promise(resolve => setTimeout(resolve, 200));
       }
-      await new Promise(resolve => setTimeout(resolve, 200));
+      return { success: true, message: 'Alterações salvas com sucesso' };
+    } catch (error) {
+      console.error("Erro em salvarAlteracoes:", error);
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+      return { success: false, message: errorMessage };
     }
   }
 }

@@ -2,6 +2,7 @@ import { useSpreadsheet } from '@/contexts/SpreadsheetContext';
 import { chamadoService } from '@/services/chamado.service';
 import { COLUMN_INDICES, FIELD_MAPPING } from '@/constants';
 import { usePopup } from './usePopup';
+import { toast } from 'react-hot-toast';
 
 export const useChamadoActions = (
   popup: any,
@@ -18,12 +19,12 @@ export const useChamadoActions = (
     try {
       const operador = JSON.parse(localStorage.getItem('auth_user') || '{}')?.operador || 'DESCONHECIDO';
       await chamadoService.pegarChamado({ linha: actualRowIndex, operador });
-      alert(`✅ Chamado #${dadosRow.historico} pego com sucesso!`);
+      toast.success('✅ Chamado #${dadosRow.historico} pego com sucesso!');
       await refreshData();
     } catch (error) {
       console.error('❌ Erro ao pegar chamado:', error);
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-      alert(`❌ Erro ao pegar chamado: ${errorMessage}`);
+      toast.error(`❌ Erro ao pegar chamado: ${errorMessage}`);
     }
   };
 
@@ -34,7 +35,7 @@ export const useChamadoActions = (
     }
 
     if (!novoAndamento.trim()) {
-      alert('Por favor, digite um andamento antes de salvar.');
+      toast.error('Por favor, digite um andamento antes de salvar.');
       return;
     }
 
@@ -61,14 +62,14 @@ export const useChamadoActions = (
           descricao: novoValor
         }));
         setNovoAndamento('');
-        alert('✅ Andamento adicionado com sucesso!');
+        toast.success('✅ Andamento adicionado com sucesso!');
       } else {
         throw new Error('Linha não encontrada');
       }
     } catch (error) {
       console.error('❌ Erro ao adicionar andamento:', error);
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-      alert(`❌ Erro ao salvar: ${errorMessage}`);
+      toast.error(`❌ Erro ao salvar: ${errorMessage}`);
     }
   };
 
@@ -103,15 +104,19 @@ export const useChamadoActions = (
         }
       });
 
-      await chamadoService.salvarAlteracoes(updates);
-
-      alert('✅ Todas as alterações foram salvas com sucesso!');
-      fecharPopup();
-      await refreshData();
+      const result = await chamadoService.salvarAlteracoes(updates);
+      
+      if (result.success) {
+        toast.success('✅ Todas as alterações foram salvas com sucesso!');
+        fecharPopup();
+        await refreshData();
+      } else {
+        throw new Error(result.message || 'Falha ao salvar as alterações');
+      }
     } catch (error) {
       console.error('❌ Erro ao salvar alterações:', error);
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-      alert(`❌ Erro ao salvar: ${errorMessage}`);
+      toast.error(`❌ Erro ao salvar: ${errorMessage}`);
     }
   };
 
