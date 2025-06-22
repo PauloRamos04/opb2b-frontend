@@ -7,7 +7,7 @@ import Header from '@/components/Header';
 import Table from '@/components/Table';
 import Popup from '@/components/Popup';
 import { RefreshCw, X } from 'lucide-react';
-import { getUniqueValues, filterData } from '@/utils/functions';
+import { getUniqueValues, filterData, parseDate } from '@/utils/functions';
 import { renderStatusBadge, renderCarteiraBadge } from '@/utils/badges';
 import {
   COLUMN_INDICES,
@@ -115,7 +115,42 @@ const Spreadsheet: React.FC = () => {
     const dataRows = data.slice(DATA_START_ROW);
     const filtered = filterData(dataRows, filtrosAvancados, COLUMN_INDICES);
 
-    const filteredWithOriginalIndex = filtered.map((rowData) => {
+    // Função para parsear datas no formato DD/MM HH:mm (assume ano atual)
+    function parseDataAberturaLocal(dateStr: string): Date | null {
+      if (!dateStr) return null;
+      // DD/MM HH:mm
+      const match = dateStr.match(/(\d{1,2})\/(\d{1,2}) (\d{1,2}):(\d{1,2})/);
+      if (match) {
+        const day = parseInt(match[1], 10);
+        const month = parseInt(match[2], 10) - 1;
+        const hour = parseInt(match[3], 10);
+        const minute = parseInt(match[4], 10);
+        const year = new Date().getFullYear();
+        return new Date(year, month, day, hour, minute, 0);
+      }
+      // fallback para parseDate padrão
+      return parseDate(dateStr);
+    }
+
+    // Ordenação: OPERADOR = 'LIVRE' primeiro, mais recentes no topo
+    const sorted = filtered.sort((a, b) => {
+      const operadorA = a[COLUMN_INDICES.OPERADOR] || '';
+      const operadorB = b[COLUMN_INDICES.OPERADOR] || '';
+      const dataA = parseDataAberturaLocal(a[COLUMN_INDICES['DATA ABERTURA']]);
+      const dataB = parseDataAberturaLocal(b[COLUMN_INDICES['DATA ABERTURA']]);
+
+      // Prioriza chamados com OPERADOR 'LIVRE'
+      if (operadorA === 'LIVRE' && operadorB !== 'LIVRE') return -1;
+      if (operadorA !== 'LIVRE' && operadorB === 'LIVRE') return 1;
+
+      // Dentro do mesmo grupo, ordena por data de abertura (mais recente primeiro)
+      if (dataA && dataB) {
+        return dataB.getTime() - dataA.getTime();
+      }
+      return 0;
+    });
+
+    const filteredWithOriginalIndex = sorted.map((rowData) => {
       const originalIndex = dataRows.findIndex(dataRow => dataRow === rowData);
       return {
         data: rowData,
@@ -215,7 +250,6 @@ const Spreadsheet: React.FC = () => {
         pegarChamado={pegarChamado}
         renderStatusBadge={(status) => renderStatusBadge(status, darkMode)}
         renderCarteiraBadge={(carteira) => renderCarteiraBadge(carteira, darkMode)}
-        tecnicos={valoresUnicos.tecnicos}
       />
     </div>
   );
