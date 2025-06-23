@@ -59,11 +59,7 @@ export const filterData = (
   filters: FilterState,
   columnIndices: Record<string, number>
 ): string[][] => {
-  console.log('🔍 Aplicando filtros:', filters);
-  console.log('📊 Dados recebidos:', data.length, 'linhas');
-  
   if (data.length === 0) {
-    console.log('❌ Nenhum dado para filtrar');
     return [];
   }
   
@@ -154,12 +150,11 @@ export const filterData = (
     if (filters.dataInicio || filters.dataFim) {
       const dataAbertura = row[columnIndices['DATA ABERTURA']] || '';
       const dataRow = parseDate(dataAbertura);
-      
+      if (!dataRow) return false;
       if (filters.dataInicio) {
         const dataInicio = new Date(filters.dataInicio);
         if (dataRow < dataInicio) return false;
       }
-      
       if (filters.dataFim) {
         const dataFim = new Date(filters.dataFim);
         dataFim.setHours(23, 59, 59, 999);
@@ -170,7 +165,6 @@ export const filterData = (
     return true;
   });
 
-  console.log('✅ Dados filtrados:', filteredData.length, 'linhas');
   return filteredData;
 };
 
@@ -179,11 +173,7 @@ export const filterDataDetailed = (
   filteredData: FilteredDataItem[],
   columnIndices: Record<string, number>
 ): FilteredDataItem[] => {
-  console.log('🔍 Aplicando busca detalhada:', filteredData.length, 'itens');
-  console.log('📊 Dados recebidos:', originalData.length, 'linhas');
-  
   if (originalData.length === 0) {
-    console.log('❌ Nenhum dado para buscar');
     return [];
   }
   

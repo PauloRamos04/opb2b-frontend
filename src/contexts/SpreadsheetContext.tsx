@@ -62,14 +62,11 @@ export const SpreadsheetProvider: React.FC<SpreadsheetProviderProps> = ({ childr
     try {
       setLoading(true);
       setError(null);
-      console.log('🔄 Carregando dados...');
       
       const response = await apiService.getData();
-      console.log('📡 Resposta da API:', response);
       
       if (response.success && response.data) {
         setData(response.data);
-        console.log(`✅ Dados carregados: ${response.data.length} linhas`);
         setIsConnected(true);
         toast.success(`${response.data.length} linhas carregadas`);
       } else {
@@ -78,7 +75,6 @@ export const SpreadsheetProvider: React.FC<SpreadsheetProviderProps> = ({ childr
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro desconhecido';
       setError(errorMessage);
-      console.error('❌ Erro ao carregar dados:', err);
       toast.error(`Erro: ${errorMessage}`);
       setIsConnected(false);
     } finally {
@@ -96,29 +92,26 @@ export const SpreadsheetProvider: React.FC<SpreadsheetProviderProps> = ({ childr
     try {
       const response = await apiService.getStatus();
       setIsConnected(response.success);
-      if (response.success) {
-        console.log('✅ Conectado ao servidor');
-      }
     } catch (error) {
       setIsConnected(false);
-      console.error('❌ Erro de conexão:', error);
     }
   }, [isAuthenticated]);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      checkConnection();
-      loadData();
-      const interval = setInterval(checkConnection, 30000);
-      const polling = setInterval(() => {
-        refreshData();
-      }, 30000);
-      return () => {
-        clearInterval(interval);
-        clearInterval(polling);
-      };
-    }
-  }, [isAuthenticated, checkConnection, loadData, refreshData]);
+    if (!isAuthenticated) return;
+    checkConnection();
+    loadData();
+  }, [isAuthenticated, checkConnection, loadData]);
+
+  useEffect(() => {
+    const handleDataUpdate = () => {
+      refreshData();
+    };
+    on('data-update', handleDataUpdate);
+    return () => {
+      off('data-update', handleDataUpdate);
+    };
+  }, [on, off, refreshData]);
 
   const updateCell = useCallback(async (row: number, col: number, value: string) => {
     if (!isAuthenticated || !user) {
@@ -127,18 +120,15 @@ export const SpreadsheetProvider: React.FC<SpreadsheetProviderProps> = ({ childr
     }
 
     try {
-      console.log(`📝 Atualizando célula [${row}, ${col}] = "${value}" por ${user.operador}`);
       const response = await apiService.updateCell({ row, col, value });
       
       if (response.success) {
-        console.log('✅ Célula atualizada com sucesso');
         toast.success('Célula atualizada');
         await refreshData();
       }
       return response;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro desconhecido';
-      console.error('❌ Erro ao atualizar célula:', err);
       toast.error(`Erro: ${errorMessage}`);
       throw err;
     }
@@ -151,11 +141,9 @@ export const SpreadsheetProvider: React.FC<SpreadsheetProviderProps> = ({ childr
     }
 
     try {
-      console.log('📝 Criando novo chamado:', dados, 'por', user.operador);
       const response = await apiService.criarChamado(dados);
       
       if (response.success) {
-        console.log('✅ Chamado criado com sucesso');
         toast.success('Chamado criado com sucesso');
         await refreshData();
       } else {
@@ -163,29 +151,10 @@ export const SpreadsheetProvider: React.FC<SpreadsheetProviderProps> = ({ childr
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro desconhecido';
-      console.error('❌ Erro ao criar chamado:', err);
       toast.error(`Erro: ${errorMessage}`);
       throw err;
     }
   }, [isAuthenticated, user, refreshData]);
-
-  useEffect(() => {
-    const handleDataUpdate = () => {
-      console.log('Recebido evento de atualização do backend via socket!');
-      toast.success('A planilha foi atualizada!', { duration: 2000 });
-      refreshData();
-    };
-
-    on('data-update', handleDataUpdate);
-
-    return () => {
-      off('data-update', handleDataUpdate);
-    };
-  }, [on, off, refreshData]);
-
-  useEffect(() => {
-    refreshData();
-  }, [refreshData]);
 
   return (
     <SpreadsheetContext.Provider
