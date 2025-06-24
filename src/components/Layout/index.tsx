@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Home, Menu, X, Sun, Moon, LogOut, User } from 'lucide-react';
+import { Home, Menu, X, Sun, Moon, LogOut, User, BarChart2 } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePathname } from 'next/navigation';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -13,9 +14,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { darkMode, toggleDarkMode } = useTheme();
   const { user, logout } = useAuth();
+  const pathname = usePathname();
 
   const menuItems = [
-    { icon: Home, label: 'Dashboard', href: '/dashboard', active: true },
+    { icon: Home, label: 'Dashboard', href: '/dashboard' },
+    { icon: BarChart2, label: 'Relatórios', href: '/relatorios' },
   ];
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
@@ -38,19 +41,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <nav className="flex-1 mt-6">
             {menuItems.map((item, index) => {
               const Icon = item.icon;
+              const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
               return (
                 <a
                   key={index}
                   href={item.href}
                   className={`flex items-center px-6 py-4 text-sm font-medium transition-colors ${
-                    item.active
+                    isActive
                       ? 'bg-indigo-700 border-r-4 border-green-400 text-white'
                       : 'hover:bg-indigo-700 text-indigo-100 hover:text-white'
                   }`}
                 >
                   <Icon className="w-6 h-6 flex-shrink-0" />
                   {sidebarOpen && <span className="ml-3">{item.label}</span>}
-                  {item.active && !sidebarOpen && (
+                  {isActive && !sidebarOpen && (
                     <div className="absolute left-16 w-2 h-2 bg-green-400 rounded-full"></div>
                   )}
                 </a>
@@ -111,12 +115,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <nav className="flex-1 mt-6">
             {menuItems.map((item, index) => {
               const Icon = item.icon;
+              const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
               return (
                 <a
                   key={index}
                   href={item.href}
                   className={`flex items-center px-6 py-4 text-sm font-medium transition-colors ${
-                    item.active
+                    isActive
                       ? 'bg-indigo-700 border-r-4 border-green-400 text-white'
                       : 'hover:bg-indigo-700 text-indigo-100 hover:text-white'
                   }`}

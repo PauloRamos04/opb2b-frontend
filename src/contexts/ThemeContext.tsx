@@ -22,27 +22,30 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
+  const [mounted, setMounted] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('darkMode');
-    if (savedTheme) {
-      setDarkMode(savedTheme === 'true');
-    }
+    const savedTheme = typeof window !== 'undefined' ? localStorage.getItem('darkMode') : null;
+    setDarkMode(savedTheme === 'true');
+    setMounted(true);
   }, []);
 
   useEffect(() => {
+    if (!mounted) return;
     if (darkMode) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
     localStorage.setItem('darkMode', darkMode.toString());
-  }, [darkMode]);
+  }, [darkMode, mounted]);
 
   const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
+    setDarkMode((prev) => !prev);
   };
+
+  if (!mounted) return null;
 
   return (
     <ThemeContext.Provider value={{ darkMode, toggleDarkMode }}>

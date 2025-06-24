@@ -24,7 +24,7 @@ export const useLogin = () => {
 
     if (!email) {
       newErrors.email = 'Email é obrigatório';
-    } else if (!/\\S+@\\S+\\.\\S+/.test(email)) {
+    } else if (!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(email)) {
       newErrors.email = 'Email deve ter um formato válido';
     }
 

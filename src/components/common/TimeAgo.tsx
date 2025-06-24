@@ -10,10 +10,16 @@ interface TimeAgoProps {
 }
 
 const TimeAgo: React.FC<TimeAgoProps> = ({ dateString, modoDias }) => {
+  const [mounted, setMounted] = useState(false);
   const [timeAgo, setTimeAgo] = useState('');
   const [colorClass, setColorClass] = useState('text-green-500');
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
     // Função flexível para parsear datas
     function parseDateFlex(dateStr: string): Date | null {
       if (!dateStr) return null;
@@ -97,7 +103,9 @@ const TimeAgo: React.FC<TimeAgoProps> = ({ dateString, modoDias }) => {
     const intervalId = setInterval(updateTimer, 30000); // Atualiza a cada 30 segundos
 
     return () => clearInterval(intervalId); // Limpa o intervalo
-  }, [dateString, modoDias]);
+  }, [dateString, modoDias, mounted]);
+
+  if (!mounted) return null;
 
   return (
     <span className={`flex items-center space-x-1 text-sm ${colorClass}`}>

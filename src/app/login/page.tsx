@@ -3,7 +3,6 @@
 import React from 'react';
 import { Eye, EyeOff, User, Lock, AlertCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { AuthProvider } from '@/contexts/AuthContext';
 import { useLogin } from '@/hooks/useLogin';
 
 function LoginForm() {
@@ -153,9 +152,5 @@ function LoginForm() {
 }
 
 export default function LoginPage() {
-  return (
-    <AuthProvider>
-      <LoginForm />
-    </AuthProvider>
-  );
+  return <LoginForm />;
 }

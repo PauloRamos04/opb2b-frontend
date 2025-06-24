@@ -42,12 +42,16 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [primeiroCarregamento, setPrimeiroCarregamento] = useState(true);
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
 
   const isAuthenticated = !!user;
 
   useEffect(() => {
     checkAuthStatus();
+    setPrimeiroCarregamento(false);
+    setMounted(true);
   }, []);
 
   const checkAuthStatus = async () => {
@@ -128,7 +132,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = async () => {
     try {
       const token = localStorage.getItem('auth_token') || localStorage.getItem('auth_session');
-      
       if (token) {
         await fetch(`${API_BASE_URL}/auth/logout`, {
           method: 'POST',
@@ -140,7 +143,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         });
       }
     } catch (error) {
-      // APENAS no logout que limpa tudo
+      // Pode logar o erro, mas não precisa fazer nada aqui
+    } finally {
       setUser(null);
       localStorage.removeItem('auth_token');
       localStorage.removeItem('auth_session');
@@ -151,11 +155,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  if (!mounted) return null;
+
   return (
     <AuthContext.Provider value={{
       user,
       isAuthenticated,
-      isLoading,
+      isLoading: primeiroCarregamento && !user ? isLoading : false,
       login,
       logout,
     }}>
