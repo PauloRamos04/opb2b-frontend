@@ -62,14 +62,14 @@ export const useChamadoActions = (
           descricao: novoValor
         }));
         setNovoAndamento('');
-        toast.success('✅ Andamento adicionado com sucesso!');
+        toast.success('Andamento adicionado com sucesso!');
       } else {
         throw new Error('Linha não encontrada');
       }
     } catch (error) {
-      console.error('❌ Erro ao adicionar andamento:', error);
+      console.error('Erro ao adicionar andamento:', error);
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-      toast.error(`❌ Erro ao salvar: ${errorMessage}`);
+      toast.error(`Erro ao salvar: ${errorMessage}`);
     }
   };
 

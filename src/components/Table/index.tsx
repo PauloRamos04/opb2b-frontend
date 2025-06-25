@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
 import {
   Edit,
@@ -11,6 +11,9 @@ import {
 import { TABLE_COLUMN_ORDER, COLUMN_INDICES } from '@/constants';
 import { renderOperadorBadge } from '@/utils/badges';
 import TimeAgo from '../common/TimeAgo';
+import { useAuth } from '@/contexts/AuthContext';
+import { apiService } from '@/services/api.service';
+import { toast } from 'react-hot-toast';
 
 interface FilteredDataItem {
   data: string[];
@@ -32,6 +35,38 @@ interface TableProps {
   renderCarteiraBadge: (carteira: string) => JSX.Element;
 }
 
+const RESOLUCOES_BO = [
+  'B2B - OCORRENCIA DUPLICADA',
+  'B2B - ABERTO VISITA TÉCNICA',
+  'B2B - ABERTO ACOMPANHAMENTO DE V.T',
+  'B2B - ABERTO ACOMPANHAMENTO DE VISTORIA',
+  'B2B - ANULADA SEM CONTATO',
+  'B2B - ÁREA SINALIZADA / ALERTA / RUIE',
+  'B2B - NORMALIZADO SEM INTERVENÇÃO',
+  'B2B - AJUSTES INTERNOS',
+  'B2B - AGUARDANDO NOC',
+  'B2B - AGUARDANDO ENGENHARIA',
+  'B2B - AGUARDANDO TI',
+  'B2B - AGUARDANDO TELEFONIA',
+  'B2B - AGUARDANDO REDE EXTERNA',
+  'B2B - SUPORTE AO CLIENTE',
+  'B2B - FEITO PROCEDIMENTOS COM O CLIENTE - INTERNET / WI-FI',
+  'B2B - PROBLEMA/LIMITAÇÃO NO EQUIPAMENTO DO ASSINANTE',
+  'B2B - ABERTO VT - R.E',
+  'B2B - FEITO PROCEDIMENTOS COM O CLIENTE - TELEFONE',
+  'B2B - FIXADO IP',
+  'B2B - SOLUCIONADO NOC',
+  'B2B - VELOCIDADE REDUZIDA (1M)',
+  'B2B - VALIDAÇÃO',
+  'B2B - PERMUTA',
+  'B2B - SOLUCIONADO ENGENHARIA',
+  'S.I - SUPORTE',
+  'S.I - ABERTO VT',
+  'S.I - AJUSTES INTERNOS',
+  'S.I - ANULADO SEM CONTATO',
+  'S.I - OCORRÊNCIA DUPLICADA'
+];
+
 const Table: React.FC<TableProps> = ({
   filteredData,
   colunasVisiveis,
@@ -47,11 +82,56 @@ const Table: React.FC<TableProps> = ({
   renderCarteiraBadge
 }) => {
   const { darkMode } = useTheme();
+  const { user } = useAuth();
+  const [finalizarModal, setFinalizarModal] = useState<{row: number, open: boolean}>({row: -1, open: false});
+  const [resolucaoSelecionada, setResolucaoSelecionada] = useState('');
+  const [finalizando, setFinalizando] = useState(false);
+  const [finalizarError, setFinalizarError] = useState('');
 
   const getCellValue = (row: string[], colName: string): string => {
     const colIndex = COLUMN_INDICES[colName as keyof typeof COLUMN_INDICES];
     return row[colIndex] || '';
   };
+
+  async function handleFinalizar(rowIndex: number) {
+    setFinalizarModal({row: rowIndex, open: true});
+    setResolucaoSelecionada('');
+    setFinalizarError('');
+  }
+
+  async function confirmarFinalizacao(rowIndex: number) {
+    setFinalizando(true);
+    setFinalizarError('');
+    try {
+      if (!user) throw new Error('Usuário não autenticado');
+      const agora = new Date();
+      const dia = agora.getDate().toString().padStart(2, '0');
+      const mes = (agora.getMonth() + 1).toString().padStart(2, '0');
+      const hora = agora.getHours().toString().padStart(2, '0');
+      const minutos = agora.getMinutes().toString().padStart(2, '0');
+      const horaFinalizada = `${dia}/${mes} ${hora}:${minutos}`;
+      // Atualiza H_FINALIZADA
+      const updateFinalizada = { row: rowIndex, col: COLUMN_INDICES['H_FINALIZADA'], value: horaFinalizada };
+      // Atualiza RESOLUÇÃO BO:
+      const updateResolucao = { row: rowIndex, col: COLUMN_INDICES['RESOLUÇÃO BO:'], value: resolucaoSelecionada };
+      // Atualiza OPERADOR (igual ao pegarChamado)
+      const updateOperador = { row: rowIndex, col: COLUMN_INDICES['OPERADOR'], value: user.operador };
+      const [resFinalizada, resResolucao, resOperador] = await Promise.all([
+        apiService.updateCell(updateFinalizada),
+        apiService.updateCell(updateResolucao),
+        apiService.updateCell(updateOperador)
+      ]);
+      if (!resFinalizada.success || !resResolucao.success || !resOperador.success) {
+        throw new Error('Erro ao finalizar chamado');
+      }
+      toast.success('Chamado finalizado com sucesso!');
+      setFinalizarModal({row: -1, open: false});
+    } catch (err) {
+      setFinalizarError('Erro ao finalizar chamado. Tente novamente.');
+    } finally {
+      setFinalizando(false);
+    }
+  }
 
   return (
     <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow overflow-hidden`}>
@@ -92,10 +172,12 @@ const Table: React.FC<TableProps> = ({
                 descricao: getCellValue(row, 'DESCRIÇÃO'),
                 dataAbertura: getCellValue(row, 'DATA ABERTURA'),
                 cliente: getCellValue(row, 'CLIENTE'),
-                ultimaEdicao: getCellValue(row, 'ÚLTIMA EDIÇÃO')
+                ultimaEdicao: getCellValue(row, 'ÚLTIMA EDIÇÃO'),
+                hFinalizada: getCellValue(row, 'H_FINALIZADA')
               };
 
               const temRetorno = dadosRow.operador.trim() !== 'S/C' && dadosRow.retorno.trim() !== '';
+              const jaFinalizado = !!(dadosRow.hFinalizada && dadosRow.hFinalizada.trim() !== '');
 
               return (
                 <tr key={actualRowIndex} className={`${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'} transition-colors`}>
@@ -129,6 +211,19 @@ const Table: React.FC<TableProps> = ({
                       >
                         <PhoneCall className="w-4 h-4" />
                         <span>Pegar</span>
+                      </button>
+                      <button
+                        onClick={() => handleFinalizar(actualRowIndex)}
+                        className={`flex items-center space-x-1 px-3 py-1 rounded-lg text-sm transition-colors ${jaFinalizado
+                          ? darkMode
+                            ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                            : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                          : 'bg-fuchsia-100 text-fuchsia-700 hover:bg-fuchsia-200'
+                        }`}
+                        disabled={jaFinalizado}
+                        title={jaFinalizado ? 'Chamado já finalizado' : 'Finalizar chamado'}
+                      >
+                        <span>Finalizar</span>
                       </button>
                     </div>
                   </td>
@@ -206,6 +301,39 @@ const Table: React.FC<TableProps> = ({
           <AlertCircle className={`w-12 h-12 mx-auto mb-4 ${darkMode ? 'text-gray-600' : 'text-gray-300'}`} />
           <h3 className={`text-lg font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Nenhum registro encontrado</h3>
           <p className="text-sm">Ajuste os filtros ou adicione novos chamados</p>
+        </div>
+      )}
+
+      {/* Modal de finalização */}
+      {finalizarModal.open && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md`}>
+            <h2 className="text-lg font-bold mb-4 text-fuchsia-700">Finalizar chamado</h2>
+            <label className="block mb-2 font-medium">Selecione a RESOLUÇÃO BO:</label>
+            <select
+              value={resolucaoSelecionada}
+              onChange={e => setResolucaoSelecionada(e.target.value)}
+              className="w-full mb-4 p-2 border rounded"
+            >
+              <option value="">Selecione...</option>
+              {RESOLUCOES_BO.map(opt => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+            {finalizarError && <div className="text-red-500 mb-2">{finalizarError}</div>}
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setFinalizarModal({row: -1, open: false})}
+                className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700"
+                disabled={finalizando}
+              >Cancelar</button>
+              <button
+                onClick={() => confirmarFinalizacao(finalizarModal.row)}
+                className="px-4 py-2 rounded bg-fuchsia-700 text-white hover:bg-fuchsia-800"
+                disabled={!resolucaoSelecionada || finalizando}
+              >Confirmar</button>
+            </div>
+          </div>
         </div>
       )}
     </div>

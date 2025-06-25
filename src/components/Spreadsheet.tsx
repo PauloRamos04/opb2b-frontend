@@ -47,16 +47,28 @@ const Spreadsheet: React.FC = () => {
   const [novoAndamento, setNovoAndamento] = useState('');
   const [formValues, setFormValues] = useState<any>({});
 
-  const [filtrosAvancados, setFiltrosAvancados] = useState<FilterState>({
-    ...INITIAL_FILTER_STATE,
-    status: [],
-    carteira: [],
-    operador: [],
-    tags: []
+  const [filtrosAvancados, setFiltrosAvancados] = useState<FilterState>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('filtrosAvancados');
+      if (saved) return JSON.parse(saved);
+    }
+    return {
+      ...INITIAL_FILTER_STATE,
+      status: [],
+      carteira: [],
+      operador: [],
+      tags: []
+    };
   });
 
-  const [colunasVisiveis, setColunasVisiveis] = useState<Record<string, boolean>>({
-    ...DEFAULT_VISIBLE_COLUMNS
+  const [colunasVisiveis, setColunasVisiveis] = useState<Record<string, boolean>>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('colunasVisiveis');
+      if (saved) return JSON.parse(saved);
+    }
+    return {
+      ...DEFAULT_VISIBLE_COLUMNS
+    };
   });
 
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
@@ -110,6 +122,14 @@ const Spreadsheet: React.FC = () => {
       applyFilters();
     }
   }, [data, filtrosAvancados]);
+
+  useEffect(() => {
+    localStorage.setItem('filtrosAvancados', JSON.stringify(filtrosAvancados));
+  }, [filtrosAvancados]);
+
+  useEffect(() => {
+    localStorage.setItem('colunasVisiveis', JSON.stringify(colunasVisiveis));
+  }, [colunasVisiveis]);
 
   const applyFilters = () => {
     const dataRows = data.slice(DATA_START_ROW);

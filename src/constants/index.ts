@@ -19,7 +19,7 @@ export const CARTEIRAS_LIST = [
 
 export const STATUS_CLASSES = {
   'EM ANÁLISE': 'bg-orange-500 text-white',
-  'FINALIZADO': 'bg-green-500 text-white',
+  'FINALIZADO': 'bg-fuchsia-700 text-white',
   'AGENDADA': 'bg-blue-500 text-white',
   'EM ATD - USO': 'bg-emerald-500 text-white',
   'ANULADA': 'bg-gray-500 text-white',
@@ -39,12 +39,12 @@ export const STATUS_CLASSES = {
 
 export const STATUS_CLASSES_DARK = {
   'EM ANÁLISE': 'bg-orange-400 text-gray-900',
-  'FINALIZADO': 'bg-green-400 text-gray-900',
+  'FINALIZADO': 'bg-red-400 text-gray-900',
   'AGENDADA': 'bg-blue-400 text-gray-900',
   'EM ATD - USO': 'bg-emerald-400 text-gray-900',
   'ANULADA': 'bg-gray-400 text-gray-900',
   'FINALIZADO / VT': 'bg-teal-400 text-gray-900',
-  'SEM CONTATO #UD': 'bg-red-400 text-gray-900',
+  'SEM CONTATO #UD': 'bg-red-300 text-gray-900',
   'SEM CONTATO 2': 'bg-red-500 text-gray-900',
   'SEM CONTATO 3': 'bg-red-600 text-gray-900',
   'AGUARDANDO - NOC': 'bg-indigo-400 text-gray-900',
